@@ -1,0 +1,21 @@
+# Static analysis (BSWP-10).
+# Level 5+ with WordPress stubs, per the ticket's floor.
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+	level: 5
+	paths:
+		- book-surfer.php
+		- uninstall.php
+		- includes
+	excludePaths:
+		- vendor
+		- node_modules
+		- build
+		- stub
+	bootstrapFiles:
+		- tests/php/phpstan-bootstrap.php
+	ignoreErrors:
+		# The WordPress test suite classes are not present during analysis.
+		- '#Class WP_UnitTestCase not found#'

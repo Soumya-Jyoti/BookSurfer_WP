@@ -1,0 +1,85 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "booksurfer/booking-form",
+	"version": "1.0.0",
+	"title": "Book Surfer Booking Form",
+	"category": "embed",
+	"icon": "calendar-alt",
+	"description": "Embed a live Book Surfer booking form or class schedule.",
+	"keywords": [ "booking", "class", "schedule", "book surfer", "form" ],
+	"textdomain": "book-surfer",
+	"supports": {
+		"html": false,
+		"multiple": true,
+		"align": [ "left", "center", "right", "wide", "full" ],
+		"spacing": {
+			"margin": true,
+			"padding": false
+		}
+	},
+	"attributes": {
+		"variant": {
+			"type": "string",
+			"default": "class",
+			"enum": [ "class", "allInOne", "schedule" ]
+		},
+		"embedUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"studioHandle": {
+			"type": "string",
+			"default": ""
+		},
+		"classId": {
+			"type": "string",
+			"default": ""
+		},
+		"classLabel": {
+			"type": "string",
+			"default": ""
+		},
+		"layout": {
+			"type": "string",
+			"default": "classic",
+			"enum": [ "classic", "modern", "minimal", "compact" ]
+		},
+		"allInOneStyle": {
+			"type": "string",
+			"default": "sidebar",
+			"enum": [ "sidebar", "dropdown" ]
+		},
+		"width": {
+			"type": "number",
+			"default": 480
+		},
+		"height": {
+			"type": "number",
+			"default": 720
+		},
+		"styling": {
+			"type": "object",
+			"default": {
+				"primary": "#0D9488",
+				"text": "#1e293b",
+				"bg": "#ffffff",
+				"radius": 14,
+				"padding": 32,
+				"font": "Roboto"
+			}
+		}
+	},
+	"example": {
+		"attributes": {
+			"variant": "class",
+			"studioHandle": "demo-studio",
+			"classId": "demo",
+			"layout": "classic",
+			"width": 480,
+			"height": 720
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css"
+}

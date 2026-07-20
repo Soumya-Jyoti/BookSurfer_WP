@@ -1,0 +1,30 @@
+/**
+ * Editor-only styles for the Book Surfer block.
+ *
+ * BSWP-27/40. Loaded via block.json's editorStyle — the editor only. The front end
+ * ships zero CSS from this block; the booking form is an iframe.
+ */
+
+@tailwind components;
+@tailwind utilities;
+
+.booksurfer-block-preview {
+	position: relative;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.booksurfer-block-preview iframe {
+	max-width: 100%;
+}
+
+.booksurfer-block-skeleton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #f1f5f9;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	color: #64748b;
+	font-size: 13px;
+}

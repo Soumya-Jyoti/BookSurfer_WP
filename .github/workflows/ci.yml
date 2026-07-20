@@ -1,0 +1,134 @@
+# Continuous integration.
+#
+# BSWP-10/45/46/47. Every gate the plugin ships behind runs here on every PR.
+# The parity job is the important one: it proves the PHP and JS embed-URL builders
+# still agree (BSWP-34). Enable branch protection on these jobs so a red build
+# blocks merge.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php-lint:
+    name: PHPCS + PHPStan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: PHPCS (WordPress coding standards)
+        run: composer run lint
+
+      - name: PHPStan
+        run: composer run analyse
+
+  js:
+    name: Lint, typecheck, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint:js
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Jest unit tests (includes the JS half of the parity gate)
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
+
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The declared support floor, the common production version, and current.
+        php: [ '7.4', '8.1', '8.3' ]
+    env:
+      WP_ENV_PHP_VERSION: ${{ matrix.php }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install PHP dependencies
+        run: |
+          npm run env:start
+          npx wp-env run tests-cli --env-cwd=wp-content/plugins/book-surfer -- composer install --no-interaction
+
+      - name: PHPUnit (includes the PHP half of the parity gate)
+        run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/book-surfer -- vendor/bin/phpunit
+
+      - name: Stop wp-env
+        if: always()
+        run: npm run env:stop
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start the SaaS stub
+        run: |
+          node stub/server.js &
+          npx wait-on http://127.0.0.1:5199/__stub/reset --timeout 30000
+
+      - name: Start wp-env
+        run: npm run env:start
+
+      - name: Run E2E
+        run: npm run test:e2e
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

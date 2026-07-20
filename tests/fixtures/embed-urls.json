@@ -1,0 +1,256 @@
+{
+	"_comment": "BSWP-34/46 golden fixture. The PHP suite (tests/php/test-embed-parity.php) and the JS suite (tests/js/embed-parity.test.ts) both assert booksurfer_build_embed_url()/buildEmbedUrl() return `expected` byte-for-byte for each case. Any divergence fails CI. apiBase is pinned so the fixture is host-independent.",
+	"apiBase": "https://api.booksurfer.in/api",
+	"cases": [
+		{
+			"name": "class / classic / default styling / SaaS-provided base",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "classic"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / modern",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "modern"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=modern&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / minimal",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "minimal"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=minimal&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / compact",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "compact"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=compact&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / unknown layout falls back to classic",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "bogus"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / a prototype-chain key is not a valid layout",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "constructor"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "allInOne / a prototype-chain key is not a valid style",
+			"atts": {
+				"variant": "allInOne",
+				"studioHandle": "demo-studio",
+				"allInOneStyle": "toString"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book?primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / no provided base, built from handle + id",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "abc-123",
+				"layout": "classic"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/abc-123?layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / base with a pre-existing query param preserves it first",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42?ref=xyz",
+				"layout": "classic"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?ref=xyz&layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / custom styling, # stripped from colours",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "classic",
+				"styling": {
+					"primary": "#ff0000",
+					"text": "#000000",
+					"bg": "#fafafa",
+					"font": "Inter",
+					"radius": 0
+				}
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=classic&primary=ff0000&text=000000&bg=fafafa&font=Inter&radius=0"
+		},
+		{
+			"name": "class / font with a space encodes as + (not %20)",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "classic",
+				"styling": { "font": "Open Sans" }
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Open+Sans&radius=14"
+		},
+		{
+			"name": "class / colour without a leading # passes through unchanged",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "classic",
+				"styling": { "primary": "0D9488" }
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / radius coerced to int",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42",
+				"layout": "classic",
+				"styling": { "radius": 24 }
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=24"
+		},
+		{
+			"name": "allInOne / sidebar has no style param",
+			"atts": {
+				"variant": "allInOne",
+				"studioHandle": "demo-studio",
+				"allInOneStyle": "sidebar"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book?primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "allInOne / dropdown adds style=dropdown first",
+			"atts": {
+				"variant": "allInOne",
+				"studioHandle": "demo-studio",
+				"allInOneStyle": "dropdown"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book?style=dropdown&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "allInOne / unknown style falls back to sidebar",
+			"atts": {
+				"variant": "allInOne",
+				"studioHandle": "demo-studio",
+				"allInOneStyle": "bogus"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book?primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "allInOne / custom styling",
+			"atts": {
+				"variant": "allInOne",
+				"studioHandle": "demo-studio",
+				"allInOneStyle": "dropdown",
+				"styling": { "primary": "#123456", "font": "Montserrat", "radius": 8 }
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book?style=dropdown&primary=123456&text=1e293b&bg=ffffff&font=Montserrat&radius=8"
+		},
+		{
+			"name": "schedule / all classes, no layout and no styling",
+			"atts": {
+				"variant": "schedule",
+				"studioHandle": "demo-studio"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/schedule"
+		},
+		{
+			"name": "schedule / single class",
+			"atts": {
+				"variant": "schedule",
+				"studioHandle": "demo-studio",
+				"classId": "42"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/schedule/42"
+		},
+		{
+			"name": "schedule / styling is ignored for timetables",
+			"atts": {
+				"variant": "schedule",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"styling": { "primary": "#ff0000", "radius": 30 }
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/schedule/42"
+		},
+		{
+			"name": "invalid handle renders nothing",
+			"atts": {
+				"variant": "allInOne",
+				"studioHandle": "Bad Handle!"
+			},
+			"expected": ""
+		},
+		{
+			"name": "class with no handle and no base renders nothing",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "",
+				"classId": "42",
+				"layout": "classic"
+			},
+			"expected": ""
+		},
+		{
+			"name": "class with an invalid class id and no base renders nothing",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "not/valid",
+				"layout": "classic"
+			},
+			"expected": ""
+		},
+		{
+			"name": "unknown variant renders nothing",
+			"atts": {
+				"variant": "bogus",
+				"studioHandle": "demo-studio"
+			},
+			"expected": ""
+		}
+	]
+}
