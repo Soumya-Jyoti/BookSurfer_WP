@@ -4,7 +4,7 @@
  * BSWP-24. Opens the consent popup and polls WordPress; the exchange itself is
  * PHP's job. No token ever touches this component.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { Notice, Spinner } from '@wordpress/components';
@@ -40,7 +40,10 @@ export default function ConnectPanel( { bootstrap, onConnected }: Props ) {
 
 			{ error && (
 				<div className="bs-my-3">
-					<Notice status={ state === 'failed' ? 'error' : 'warning' } isDismissible={ false }>
+					<Notice
+						status={ state === 'failed' ? 'error' : 'warning' }
+						isDismissible={ false }
+					>
 						{ error }
 					</Notice>
 				</div>
@@ -49,17 +52,32 @@ export default function ConnectPanel( { bootstrap, onConnected }: Props ) {
 			{ state === 'popup-blocked' && fallbackUrl && (
 				<div className="bs-my-3">
 					<Notice status="warning" isDismissible={ false }>
-						{ __( 'Your browser blocked the sign-in window.', 'book-surfer' ) }{ ' ' }
-						<a href={ fallbackUrl } target="_blank" rel="noopener noreferrer">
+						{ __(
+							'Your browser blocked the sign-in window.',
+							'book-surfer'
+						) }{ ' ' }
+						<a
+							href={ fallbackUrl }
+							target="_blank"
+							rel="noopener noreferrer"
+						>
 							{ __( 'Open it manually', 'book-surfer' ) }
 						</a>
-						{ __( ' — this page will finish connecting automatically.', 'book-surfer' ) }
+						{ __(
+							'— this page will finish connecting automatically.',
+							'book-surfer'
+						) }
 					</Notice>
 				</div>
 			) }
 
 			<div className="bs-flex bs-items-center bs-gap-3 bs-mt-4">
-				<button type="button" className="bs-btn-primary" onClick={ connect } disabled={ busy }>
+				<button
+					type="button"
+					className="bs-btn-primary"
+					onClick={ connect }
+					disabled={ busy }
+				>
 					{ busy
 						? __( 'Waiting for approval…', 'book-surfer' )
 						: __( 'Connect with Book Surfer', 'book-surfer' ) }
@@ -73,9 +91,24 @@ export default function ConnectPanel( { bootstrap, onConnected }: Props ) {
 			</div>
 
 			<ol className="bs-text-xs bs-text-slate-500 bs-mt-5 bs-pl-4">
-				<li>{ __( 'Click Connect — a Book Surfer window opens.', 'book-surfer' ) }</li>
-				<li>{ __( 'Sign in and approve access for this site.', 'book-surfer' ) }</li>
-				<li>{ __( 'The window closes and your classes appear here.', 'book-surfer' ) }</li>
+				<li>
+					{ __(
+						'Click Connect — a Book Surfer window opens.',
+						'book-surfer'
+					) }
+				</li>
+				<li>
+					{ __(
+						'Sign in and approve access for this site.',
+						'book-surfer'
+					) }
+				</li>
+				<li>
+					{ __(
+						'The window closes and your classes appear here.',
+						'book-surfer'
+					) }
+				</li>
 			</ol>
 		</div>
 	);

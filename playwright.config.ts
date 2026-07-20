@@ -5,7 +5,7 @@
  * the suite makes no real network calls and can drive the negative paths
  * deterministically.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { defineConfig, devices } from '@playwright/test';

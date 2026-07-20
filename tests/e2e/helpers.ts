@@ -3,17 +3,27 @@
  *
  * BSWP-47. Shared login/stub utilities. Everything runs against the BSWP-5 stub.
  *
- * @package BookSurfer
+ * @package
  */
 
 import type { Page } from '@playwright/test';
 
-export const STUB_URL = process.env.BOOKSURFER_STUB_URL || 'http://127.0.0.1:5199';
+export const STUB_URL =
+	process.env.BOOKSURFER_STUB_URL || 'http://127.0.0.1:5199';
 export const ADMIN_USER = 'admin';
 export const ADMIN_PASS = 'password';
 
-/** Log in to wp-admin. */
-export async function login( page: Page, user = ADMIN_USER, pass = ADMIN_PASS ): Promise< void > {
+/**
+ * Log in to wp-admin.
+ * @param page
+ * @param user
+ * @param pass
+ */
+export async function login(
+	page: Page,
+	user = ADMIN_USER,
+	pass = ADMIN_PASS
+): Promise< void > {
 	await page.goto( '/wp-login.php' );
 	await page.fill( '#user_login', user );
 	await page.fill( '#user_pass', pass );
@@ -21,12 +31,18 @@ export async function login( page: Page, user = ADMIN_USER, pass = ADMIN_PASS ):
 	await page.waitForURL( /wp-admin/ );
 }
 
-/** Clear all stub state so each test starts from a known place. */
+/**
+ * Clear all stub state so each test starts from a known place.
+ * @param page
+ */
 export async function resetStub( page: Page ): Promise< void > {
 	await page.request.get( `${ STUB_URL }/__stub/reset` );
 }
 
-/** Open the plugin's settings screen. */
+/**
+ * Open the plugin's settings screen.
+ * @param page
+ */
 export async function gotoSettings( page: Page ): Promise< void > {
 	await page.goto( '/wp-admin/admin.php?page=book-surfer' );
 }
@@ -34,35 +50,61 @@ export async function gotoSettings( page: Page ): Promise< void > {
 /**
  * Drive the stub's consent screen to completion in the popup the plugin opened.
  *
- * @param page     The admin page that triggered the popup.
- * @param approve  Approve or deny.
+ * @param page    The admin page that triggered the popup.
+ * @param approve Approve or deny.
  */
-export async function completeConsent( page: Page, approve = true ): Promise< void > {
+export async function completeConsent(
+	page: Page,
+	approve = true
+): Promise< void > {
 	const popup = await page.waitForEvent( 'popup' );
 	await popup.waitForLoadState();
 	await popup.click( approve ? 'text=Approve' : 'text=Deny' );
 	await popup.waitForLoadState();
 }
 
-/** Connect the site to the stub studio via the real UI flow. */
+/**
+ * Connect the site to the stub studio via the real UI flow.
+ * @param page
+ */
 export async function connect( page: Page ): Promise< void > {
 	await gotoSettings( page );
-	const connectButton = page.getByRole( 'button', { name: /Connect with Book Surfer/i } );
+	const connectButton = page.getByRole( 'button', {
+		name: /Connect with Book Surfer/i,
+	} );
 	await connectButton.click();
 	await completeConsent( page, true );
 	await page.getByText( /Demo Studio/ ).waitFor( { timeout: 30000 } );
 }
 
-/** Disconnect via the UI. */
+/**
+ * Disconnect via the UI.
+ * @param page
+ */
 export async function disconnect( page: Page ): Promise< void > {
 	await gotoSettings( page );
-	await page.getByRole( 'button', { name: 'Disconnect', exact: true } ).first().click();
-	await page.getByRole( 'dialog' ).getByRole( 'button', { name: 'Disconnect' } ).click();
-	await page.getByRole( 'button', { name: /Connect with Book Surfer/i } ).waitFor();
+	await page
+		.getByRole( 'button', { name: 'Disconnect', exact: true } )
+		.first()
+		.click();
+	await page
+		.getByRole( 'dialog' )
+		.getByRole( 'button', { name: 'Disconnect' } )
+		.click();
+	await page
+		.getByRole( 'button', { name: /Connect with Book Surfer/i } )
+		.waitFor();
 }
 
-/** Create a published post containing the given content, returning its permalink. */
-export async function publishPostWithContent( page: Page, content: string ): Promise< string > {
+/**
+ * Create a published post containing the given content, returning its permalink.
+ * @param page
+ * @param content
+ */
+export async function publishPostWithContent(
+	page: Page,
+	content: string
+): Promise< string > {
 	// Use the REST-free classic path: wp-admin post-new with the code editor is
 	// fiddly, so drive WP-CLI-free creation through the block editor's raw handler.
 	await page.goto( '/wp-admin/post-new.php?post_type=post' );
@@ -73,13 +115,19 @@ export async function publishPostWithContent( page: Page, content: string ): Pro
 	await page.locator( '.editor-post-text-editor' ).fill( content );
 
 	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
-	await page.getByRole( 'region', { name: 'Editor publish' } ).getByRole( 'button', { name: 'Publish', exact: true } ).click();
+	await page
+		.getByRole( 'region', { name: 'Editor publish' } )
+		.getByRole( 'button', { name: 'Publish', exact: true } )
+		.click();
 	const viewLink = page.getByRole( 'link', { name: /View Post/i } );
 	await viewLink.waitFor();
 	return ( await viewLink.getAttribute( 'href' ) ) || '';
 }
 
-/** Close the block editor's welcome modal if it appears. */
+/**
+ * Close the block editor's welcome modal if it appears.
+ * @param page
+ */
 export async function dismissEditorWelcome( page: Page ): Promise< void > {
 	const close = page.getByRole( 'button', { name: /Close dialog|Close/i } );
 	try {

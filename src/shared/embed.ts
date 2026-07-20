@@ -6,7 +6,7 @@
  * matches PHP urlencode() (spaces -> +). A golden-fixture test asserts both
  * builders produce byte-identical output; CI fails on divergence.
  *
- * @package BookSurfer
+ * @package
  */
 
 import {
@@ -34,15 +34,24 @@ export interface EmbedAttributes {
 	apiBase?: string;
 }
 
-/** The SaaS API base (already includes /api). */
+/**
+ * The SaaS API base (already includes /api).
+ * @param override
+ */
 export function getApiBase( override?: string ): string {
 	if ( override ) {
 		return override;
 	}
 	const globalConfig =
 		( typeof window !== 'undefined' &&
-			( ( window as unknown as { BookSurferAdmin?: { apiBase?: string } } ).BookSurferAdmin ||
-				( window as unknown as { BookSurferBlock?: { apiBase?: string } } ).BookSurferBlock ) ) ||
+			( (
+				window as unknown as { BookSurferAdmin?: { apiBase?: string } }
+			 ).BookSurferAdmin ||
+				(
+					window as unknown as {
+						BookSurferBlock?: { apiBase?: string };
+					}
+				 ).BookSurferBlock ) ) ||
 		undefined;
 	return globalConfig?.apiBase || 'https://api.booksurfer.in/api';
 }
@@ -57,10 +66,16 @@ export function sanitizeClassId( classId: unknown ): string {
 	return /^[A-Za-z0-9_-]{1,64}$/.test( value ) ? value : '';
 }
 
-/** Encode a query value to match PHP urlencode() (application/x-www-form-urlencoded). */
+/**
+ * Encode a query value to match PHP urlencode() (application/x-www-form-urlencoded).
+ * @param value
+ */
 export function encodeParam( value: unknown ): string {
 	return encodeURIComponent( String( value ) )
-		.replace( /[!'()*~]/g, ( c ) => '%' + c.charCodeAt( 0 ).toString( 16 ).toUpperCase() )
+		.replace(
+			/[!'()*~]/g,
+			( c ) => '%' + c.charCodeAt( 0 ).toString( 16 ).toUpperCase()
+		)
 		.replace( /%20/g, '+' );
 }
 
@@ -71,13 +86,24 @@ export function encodeParam( value: unknown ): string {
  * the prototype chain, which would let layout="constructor" pass validation here
  * while PHP's isset() correctly rejects it — a parity break and a way to smuggle a
  * value into the URL.
+ * @param object
+ * @param key
  */
 function hasKey< T extends object >( object: T, key: unknown ): key is keyof T {
-	return typeof key === 'string' && Object.prototype.hasOwnProperty.call( object, key );
+	return (
+		typeof key === 'string' &&
+		Object.prototype.hasOwnProperty.call( object, key )
+	);
 }
 
-/** Split a URL into its base and an ordered list of existing query pairs. */
-function stripQuery( url: string ): { base: string; pairs: Array< [ string, string ] > } {
+/**
+ * Split a URL into its base and an ordered list of existing query pairs.
+ * @param url
+ */
+function stripQuery( url: string ): {
+	base: string;
+	pairs: Array< [ string, string ] >;
+} {
 	const hash = url.indexOf( '?' );
 	if ( hash === -1 ) {
 		return { base: url, pairs: [] };
@@ -90,28 +116,39 @@ function stripQuery( url: string ): { base: string; pairs: Array< [ string, stri
 			const eq = part.indexOf( '=' );
 			const key = eq === -1 ? part : part.slice( 0, eq );
 			const raw = eq === -1 ? '' : part.slice( eq + 1 );
-			pairs.push( [ decodeURIComponent( key ), decodeURIComponent( raw.replace( /\+/g, ' ' ) ) ] );
+			pairs.push( [
+				decodeURIComponent( key ),
+				decodeURIComponent( raw.replace( /\+/g, ' ' ) ),
+			] );
 		}
 	}
 	return { base, pairs };
 }
 
-function appendStyling( pairs: Array< [ string, string ] >, styling?: Partial< Styling > ): void {
+function appendStyling(
+	pairs: Array< [ string, string ] >,
+	styling?: Partial< Styling >
+): void {
 	const s = { ...DEFAULT_STYLING, ...( styling || {} ) };
 	pairs.push( [ 'primary', String( s.primary ).replace( '#', '' ) ] );
 	pairs.push( [ 'text', String( s.text ).replace( '#', '' ) ] );
 	pairs.push( [ 'bg', String( s.bg ).replace( '#', '' ) ] );
 	pairs.push( [ 'font', String( s.font ) ] );
-	pairs.push( [ 'radius', String( parseInt( String( s.radius ), 10 ) || 0 ) ] );
+	pairs.push( [
+		'radius',
+		String( parseInt( String( s.radius ), 10 ) || 0 ),
+	] );
 }
 
 /**
  * Build a booking/schedule embed URL. Returns '' (render nothing) when required
  * inputs are missing or invalid.
+ * @param atts
  */
 export function buildEmbedUrl( atts: EmbedAttributes ): string {
 	const variant: Variant = atts.variant || 'class';
 	const handle = sanitizeHandle( atts.studioHandle );
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const api = getApiBase( atts.apiBase ).replace( /\/$/, '' );
 
 	let base = '';
@@ -119,7 +156,9 @@ export function buildEmbedUrl( atts: EmbedAttributes ): string {
 
 	switch ( variant ) {
 		case 'class': {
-			const layout: LayoutStyle = hasKey( LAYOUT_CONFIG, atts.layout ) ? atts.layout : 'classic';
+			const layout: LayoutStyle = hasKey( LAYOUT_CONFIG, atts.layout )
+				? atts.layout
+				: 'classic';
 			const provided = String( atts.embedUrl || '' );
 			if ( provided && provided.indexOf( 'http' ) === 0 ) {
 				const stripped = stripQuery( provided );
@@ -141,7 +180,12 @@ export function buildEmbedUrl( atts: EmbedAttributes ): string {
 			if ( ! handle ) {
 				return '';
 			}
-			const style: AllInOneStyle = hasKey( ALL_IN_ONE_CONFIG, atts.allInOneStyle ) ? atts.allInOneStyle : 'sidebar';
+			const style: AllInOneStyle = hasKey(
+				ALL_IN_ONE_CONFIG,
+				atts.allInOneStyle
+			)
+				? atts.allInOneStyle
+				: 'sidebar';
 			base = `${ api }/${ handle }/book`;
 			if ( ALL_IN_ONE_CONFIG[ style ].style !== '' ) {
 				pairs.push( [ 'style', ALL_IN_ONE_CONFIG[ style ].style ] );
@@ -170,13 +214,21 @@ export function buildEmbedUrl( atts: EmbedAttributes ): string {
 		return base;
 	}
 
-	const query = pairs.map( ( [ key, value ] ) => `${ key }=${ encodeParam( value ) }` ).join( '&' );
+	const query = pairs
+		.map( ( [ key, value ] ) => `${ key }=${ encodeParam( value ) }` )
+		.join( '&' );
 	const separator = base.indexOf( '?' ) === -1 ? '?' : '&';
 	return `${ base }${ separator }${ query }`;
 }
 
-/** Resolve width/height for a set of attributes, applying per-variant defaults. */
-export function resolveDimensions( atts: EmbedAttributes ): { width: number; height: number } {
+/**
+ * Resolve width/height for a set of attributes, applying per-variant defaults.
+ * @param atts
+ */
+export function resolveDimensions( atts: EmbedAttributes ): {
+	width: number;
+	height: number;
+} {
 	const width = Number( atts.width ) || 0;
 	const height = Number( atts.height ) || 0;
 	if ( width > 0 && height > 0 ) {
@@ -185,14 +237,26 @@ export function resolveDimensions( atts: EmbedAttributes ): { width: number; hei
 
 	switch ( atts.variant ) {
 		case 'allInOne': {
-			const style: AllInOneStyle = hasKey( ALL_IN_ONE_CONFIG, atts.allInOneStyle ) ? atts.allInOneStyle : 'sidebar';
-			return { width: ALL_IN_ONE_CONFIG[ style ].width, height: ALL_IN_ONE_CONFIG[ style ].height };
+			const style: AllInOneStyle = hasKey(
+				ALL_IN_ONE_CONFIG,
+				atts.allInOneStyle
+			)
+				? atts.allInOneStyle
+				: 'sidebar';
+			return {
+				width: ALL_IN_ONE_CONFIG[ style ].width,
+				height: ALL_IN_ONE_CONFIG[ style ].height,
+			};
 		}
 		case 'schedule':
-			return sanitizeClassId( atts.classId ) ? SCHEDULE_SIZES.single : SCHEDULE_SIZES.all;
+			return sanitizeClassId( atts.classId )
+				? SCHEDULE_SIZES.single
+				: SCHEDULE_SIZES.all;
 		case 'class':
 		default: {
-			const layout: LayoutStyle = hasKey( LAYOUT_CONFIG, atts.layout ) ? atts.layout : 'classic';
+			const layout: LayoutStyle = hasKey( LAYOUT_CONFIG, atts.layout )
+				? atts.layout
+				: 'classic';
 			return LAYOUT_CONFIG[ layout ];
 		}
 	}

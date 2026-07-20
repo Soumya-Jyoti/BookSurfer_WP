@@ -5,7 +5,7 @@
  * the user a ready-made [booksurfer] shortcode for the selection — the
  * compatibility path for Classic editor, Elementor and Divi users.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { Notice } from '@wordpress/components';
@@ -21,7 +21,9 @@ import type { AllInOneStyle, LayoutStyle } from '@shared/config';
 
 export default function ClassesPanel() {
 	const { classes, studio, loading, error, refresh } = useClasses();
-	const [ selection, setSelection ] = useState< ClassSelection | null >( null );
+	const [ selection, setSelection ] = useState< ClassSelection | null >(
+		null
+	);
 	const [ shortcode, setShortcode ] = useState< string | null >( null );
 	const [ copied, setCopied ] = useState( false );
 
@@ -67,19 +69,32 @@ export default function ClassesPanel() {
 
 			{ error && (
 				<div className="bs-mb-4">
-					<ErrorNotice error={ error } onRetry={ () => refresh( true ) } />
+					<ErrorNotice
+						error={ error }
+						onRetry={ () => refresh( true ) }
+					/>
 				</div>
 			) }
 
 			{ shortcode && (
 				<div className="bs-mb-4">
-					<Notice status="success" isDismissible onRemove={ () => setShortcode( null ) }>
+					<Notice
+						status="success"
+						isDismissible
+						onRemove={ () => setShortcode( null ) }
+					>
 						<div className="bs-flex bs-items-center bs-gap-2 bs-flex-wrap">
 							<code className="bs-text-xs bs-bg-white bs-px-2 bs-py-1 bs-rounded bs-border">
 								{ shortcode }
 							</code>
-							<button type="button" className="button button-small" onClick={ copy }>
-								{ copied ? __( 'Copied', 'book-surfer' ) : __( 'Copy shortcode', 'book-surfer' ) }
+							<button
+								type="button"
+								className="button button-small"
+								onClick={ copy }
+							>
+								{ copied
+									? __( 'Copied', 'book-surfer' )
+									: __( 'Copy shortcode', 'book-surfer' ) }
 							</button>
 						</div>
 					</Notice>
@@ -89,7 +104,10 @@ export default function ClassesPanel() {
 			{ selection?.variant === 'class' && (
 				<div className="bs-mb-4">
 					<LayoutSelector
-						title={ __( 'Choose a layout for this class', 'book-surfer' ) }
+						title={ __(
+							'Choose a layout for this class',
+							'book-surfer'
+						) }
 						onBack={ () => setSelection( null ) }
 						onSelect={ ( layout: LayoutStyle ) =>
 							emit(
@@ -109,7 +127,12 @@ export default function ClassesPanel() {
 					<AllInOneStyleSelector
 						onBack={ () => setSelection( null ) }
 						onSelect={ ( style: AllInOneStyle ) =>
-							emit( buildShortcode( { variant: 'allInOne', allInOneStyle: style } ) )
+							emit(
+								buildShortcode( {
+									variant: 'allInOne',
+									allInOneStyle: style,
+								} )
+							)
 						}
 					/>
 				</div>

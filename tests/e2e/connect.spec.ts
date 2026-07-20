@@ -5,11 +5,19 @@
  * are easy to break and impossible to catch in unit tests: denial, popup blocked,
  * and disconnect with the SaaS unreachable.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { expect, test } from '@playwright/test';
-import { STUB_URL, completeConsent, connect, disconnect, gotoSettings, login, resetStub } from './helpers';
+import {
+	STUB_URL,
+	completeConsent,
+	connect,
+	disconnect,
+	gotoSettings,
+	login,
+	resetStub,
+} from './helpers';
 
 test.beforeEach( async ( { page } ) => {
 	await resetStub( page );
@@ -59,19 +67,27 @@ test( 'no token ever reaches the browser', async ( { page } ) => {
 	await disconnect( page );
 } );
 
-test( 'a denied consent leaves the site disconnected with a retry available', async ( { page } ) => {
+test( 'a denied consent leaves the site disconnected with a retry available', async ( {
+	page,
+} ) => {
 	await gotoSettings( page );
-	await page.getByRole( 'button', { name: /Connect with Book Surfer/i } ).click();
+	await page
+		.getByRole( 'button', { name: /Connect with Book Surfer/i } )
+		.click();
 	await completeConsent( page, false );
 
 	// The state is burned; polling ends without connecting.
-	await expect( page.getByRole( 'button', { name: /Connect with Book Surfer/i } ) ).toBeVisible( {
+	await expect(
+		page.getByRole( 'button', { name: /Connect with Book Surfer/i } )
+	).toBeVisible( {
 		timeout: 30000,
 	} );
 	await expect( page.getByText( 'Demo Studio' ) ).toHaveCount( 0 );
 } );
 
-test( 'a blocked popup offers an inline fallback link rather than failing silently', async ( { page } ) => {
+test( 'a blocked popup offers an inline fallback link rather than failing silently', async ( {
+	page,
+} ) => {
 	await gotoSettings( page );
 
 	// Simulate a popup blocker.
@@ -80,7 +96,9 @@ test( 'a blocked popup offers an inline fallback link rather than failing silent
 	} );
 	await page.reload();
 
-	await page.getByRole( 'button', { name: /Connect with Book Surfer/i } ).click();
+	await page
+		.getByRole( 'button', { name: /Connect with Book Surfer/i } )
+		.click();
 
 	const fallback = page.getByRole( 'link', { name: /Open it manually/i } );
 	await expect( fallback ).toBeVisible();
@@ -91,7 +109,9 @@ test( 'a blocked popup offers an inline fallback link rather than failing silent
 	expect( href ).toContain( 'origin=' );
 } );
 
-test( 'disconnect succeeds even when the SaaS is unreachable', async ( { page } ) => {
+test( 'disconnect succeeds even when the SaaS is unreachable', async ( {
+	page,
+} ) => {
 	await connect( page );
 
 	// Make every outbound revoke call fail.
@@ -100,15 +120,21 @@ test( 'disconnect succeeds even when the SaaS is unreachable', async ( { page } 
 	await disconnect( page );
 
 	await gotoSettings( page );
-	await expect( page.getByRole( 'button', { name: /Connect with Book Surfer/i } ) ).toBeVisible();
+	await expect(
+		page.getByRole( 'button', { name: /Connect with Book Surfer/i } )
+	).toBeVisible();
 } );
 
-test( 'the settings page paints connected state without a spinner (preloaded status)', async ( { page } ) => {
+test( 'the settings page paints connected state without a spinner (preloaded status)', async ( {
+	page,
+} ) => {
 	await connect( page );
 
 	await gotoSettings( page );
 	// Studio name is present on first paint because status is preloaded.
-	await expect( page.getByText( 'Demo Studio' ) ).toBeVisible( { timeout: 3000 } );
+	await expect( page.getByText( 'Demo Studio' ) ).toBeVisible( {
+		timeout: 3000,
+	} );
 
 	await disconnect( page );
 } );

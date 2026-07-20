@@ -4,7 +4,7 @@
  * BSWP-47. The assertion that matters: the front-end iframe src is exactly what the
  * shared URL builder produces, and it keeps rendering after a disconnect.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { expect, test } from '@playwright/test';
@@ -22,16 +22,23 @@ test.beforeEach( async ( { page } ) => {
 	await login( page );
 } );
 
-test( 'insert the block, pick a class, publish, and assert the front-end iframe', async ( { page } ) => {
+test( 'insert the block, pick a class, publish, and assert the front-end iframe', async ( {
+	page,
+} ) => {
 	await connect( page );
 
 	await page.goto( '/wp-admin/post-new.php?post_type=page' );
 	await dismissEditorWelcome( page );
 
 	// Insert the block.
-	await page.getByRole( 'button', { name: /Toggle block inserter|Add block/i } ).first().click();
+	await page
+		.getByRole( 'button', { name: /Toggle block inserter|Add block/i } )
+		.first()
+		.click();
 	await page.getByPlaceholder( /Search/i ).fill( 'Book Surfer' );
-	await page.getByRole( 'option', { name: /Book Surfer Booking Form/i } ).click();
+	await page
+		.getByRole( 'option', { name: /Book Surfer Booking Form/i } )
+		.click();
 
 	// The placeholder lists classes; choose one, then a layout.
 	await page.getByText( 'Sunrise Yoga' ).waitFor();
@@ -42,7 +49,9 @@ test( 'insert the block, pick a class, publish, and assert the front-end iframe'
 	await page.getByRole( 'button', { name: /Modern/ } ).click();
 
 	// The live preview appears.
-	await expect( page.locator( '.booksurfer-block-preview iframe' ) ).toBeVisible( { timeout: 20000 } );
+	await expect(
+		page.locator( '.booksurfer-block-preview iframe' )
+	).toBeVisible( { timeout: 20000 } );
 
 	// Publish.
 	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
@@ -75,13 +84,22 @@ test( 'insert the block, pick a class, publish, and assert the front-end iframe'
 	expect( style ).toContain( 'height:680px' );
 
 	// The stub form actually renders inside the iframe.
-	await expect( page.frameLocator( 'iframe' ).locator( '[data-testid="booksurfer-stub-form"]' ) ).toBeVisible();
+	await expect(
+		page
+			.frameLocator( 'iframe' )
+			.locator( '[data-testid="booksurfer-stub-form"]' )
+	).toBeVisible();
 } );
 
-test( 'the shortcode renders the same iframe in the classic editor path', async ( { page } ) => {
+test( 'the shortcode renders the same iframe in the classic editor path', async ( {
+	page,
+} ) => {
 	await connect( page );
 
-	const url = await publishPostWithContent( page, '[booksurfer id="2" layout="compact"]' );
+	const url = await publishPostWithContent(
+		page,
+		'[booksurfer id="2" layout="compact"]'
+	);
 
 	await page.goto( url );
 	const iframe = page.locator( 'iframe' ).first();
@@ -96,10 +114,15 @@ test( 'the shortcode renders the same iframe in the classic editor path', async 
 	expect( style ).toContain( 'height:400px' );
 } );
 
-test( 'a published embed keeps rendering after the site disconnects', async ( { page } ) => {
+test( 'a published embed keeps rendering after the site disconnects', async ( {
+	page,
+} ) => {
 	await connect( page );
 
-	const url = await publishPostWithContent( page, '[booksurfer id="1" handle="demo-studio"]' );
+	const url = await publishPostWithContent(
+		page,
+		'[booksurfer id="1" handle="demo-studio"]'
+	);
 
 	await page.goto( url );
 	const before = await page.locator( 'iframe' ).first().getAttribute( 'src' );
@@ -114,7 +137,10 @@ test( 'a published embed keeps rendering after the site disconnects', async ( { 
 
 test( 'the front end enqueues no plugin JS or CSS', async ( { page } ) => {
 	await connect( page );
-	const url = await publishPostWithContent( page, '[booksurfer id="1" handle="demo-studio"]' );
+	const url = await publishPostWithContent(
+		page,
+		'[booksurfer id="1" handle="demo-studio"]'
+	);
 
 	const pluginAssets: string[] = [];
 	page.on( 'request', ( request ) => {
@@ -127,10 +153,16 @@ test( 'the front end enqueues no plugin JS or CSS', async ( { page } ) => {
 	await page.goto( url );
 	await page.locator( 'iframe' ).first().waitFor();
 
-	expect( pluginAssets, 'The block must ship zero front-end assets.' ).toEqual( [] );
+	expect(
+		pluginAssets,
+		'The block must ship zero front-end assets.'
+	).toEqual( [] );
 } );
 
-test( 'a misconfigured embed shows an editor notice but nothing to visitors', async ( { page, browser } ) => {
+test( 'a misconfigured embed shows an editor notice but nothing to visitors', async ( {
+	page,
+	browser,
+} ) => {
 	await connect( page );
 	const url = await publishPostWithContent( page, '[booksurfer]' );
 

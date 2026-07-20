@@ -4,7 +4,7 @@
  * BSWP-26. This is where the thin-client boundary becomes visible to the user —
  * the plugin's job is to hand them off to booksurfer.in, not to grow a dashboard.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { Modal, Notice } from '@wordpress/components';
@@ -19,7 +19,11 @@ interface Props {
 	onDisconnected: () => void;
 }
 
-export default function ConnectedPanel( { bootstrap, status, onDisconnected }: Props ) {
+export default function ConnectedPanel( {
+	bootstrap,
+	status,
+	onDisconnected,
+}: Props ) {
 	const [ confirming, setConfirming ] = useState( false );
 	const [ working, setWorking ] = useState( false );
 	const [ error, setError ] = useState< string | null >( null );
@@ -49,10 +53,13 @@ export default function ConnectedPanel( { bootstrap, status, onDisconnected }: P
 							aria-hidden="true"
 						/>
 						<span className="bs-font-semibold">
-							{ status.studio?.name || __( 'Connected', 'book-surfer' ) }
+							{ status.studio?.name ||
+								__( 'Connected', 'book-surfer' ) }
 						</span>
 						{ status.studio?.handle && (
-							<span className="bs-text-xs bs-text-slate-500">@{ status.studio.handle }</span>
+							<span className="bs-text-xs bs-text-slate-500">
+								@{ status.studio.handle }
+							</span>
 						) }
 					</div>
 					<p className="bs-text-xs bs-text-slate-500 bs-mt-2 bs-mb-0">
@@ -72,7 +79,11 @@ export default function ConnectedPanel( { bootstrap, status, onDisconnected }: P
 					>
 						{ __( 'Open Book Surfer Dashboard', 'book-surfer' ) }
 					</a>
-					<button type="button" className="button" onClick={ () => setConfirming( true ) }>
+					<button
+						type="button"
+						className="button"
+						onClick={ () => setConfirming( true ) }
+					>
 						{ __( 'Disconnect', 'book-surfer' ) }
 					</button>
 				</div>
@@ -81,7 +92,9 @@ export default function ConnectedPanel( { bootstrap, status, onDisconnected }: P
 			{ confirming && (
 				<Modal
 					title={ __( 'Disconnect Book Surfer?', 'book-surfer' ) }
-					onRequestClose={ () => ( working ? undefined : setConfirming( false ) ) }
+					onRequestClose={ () =>
+						working ? undefined : setConfirming( false )
+					}
 				>
 					<p className="bs-text-sm">
 						{ __(
@@ -117,7 +130,9 @@ export default function ConnectedPanel( { bootstrap, status, onDisconnected }: P
 							onClick={ handleDisconnect }
 							disabled={ working }
 						>
-							{ working ? __( 'Disconnecting…', 'book-surfer' ) : __( 'Disconnect', 'book-surfer' ) }
+							{ working
+								? __( 'Disconnecting…', 'book-surfer' )
+								: __( 'Disconnect', 'book-surfer' ) }
 						</button>
 					</div>
 				</Modal>

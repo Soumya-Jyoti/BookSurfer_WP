@@ -7,7 +7,7 @@
  *
  * Both the admin settings page and the block edit() import this — not copy-pasted.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { useCallback, useEffect, useState } from '@wordpress/element';

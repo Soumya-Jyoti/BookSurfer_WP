@@ -3,7 +3,7 @@
  *
  * BSWP-39/27. Replaces the Framer plugin's @tailwindcss/vite plugin.
  *
- * @package BookSurfer
+ * @package
  */
 
 module.exports = {

@@ -5,7 +5,7 @@
  * change: same synthetic "All Classes" card, same name-substring search, same
  * card fields, same price formatting.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { Spinner, TextControl } from '@wordpress/components';
@@ -41,7 +41,10 @@ export default function ClassList( {
 	const [ query, setQuery ] = useState( '' );
 
 	const filtered = useMemo(
-		() => classes.filter( ( c ) => c.name.toLowerCase().includes( query.toLowerCase() ) ),
+		() =>
+			classes.filter( ( c ) =>
+				c.name.toLowerCase().includes( query.toLowerCase() )
+			),
 		[ classes, query ]
 	);
 
@@ -49,7 +52,9 @@ export default function ClassList( {
 		return (
 			<div className="bs-flex bs-items-center bs-gap-2 bs-py-8 bs-justify-center">
 				<Spinner />
-				<span className="bs-text-sm bs-text-slate-500">{ __( 'Loading classes…', 'book-surfer' ) }</span>
+				<span className="bs-text-sm bs-text-slate-500">
+					{ __( 'Loading classes…', 'book-surfer' ) }
+				</span>
 			</div>
 		);
 	}
@@ -67,7 +72,11 @@ export default function ClassList( {
 					/>
 				</div>
 				{ onRefresh && (
-					<button type="button" className="button" onClick={ onRefresh }>
+					<button
+						type="button"
+						className="button"
+						onClick={ onRefresh }
+					>
 						{ __( 'Refresh classes', 'book-surfer' ) }
 					</button>
 				) }
@@ -77,16 +86,26 @@ export default function ClassList( {
 			{ studio?.handle && (
 				<div className="bs-card bs-p-4 bs-flex bs-items-center bs-justify-between bs-gap-3">
 					<div>
-						<div className="bs-font-semibold bs-text-sm">{ __( 'All Classes', 'book-surfer' ) }</div>
+						<div className="bs-font-semibold bs-text-sm">
+							{ __( 'All Classes', 'book-surfer' ) }
+						</div>
 						<div className="bs-text-xs bs-text-slate-500 bs-mt-1">
-							{ __( 'One form listing every class in your studio.', 'book-surfer' ) }
+							{ __(
+								'One form listing every class in your studio.',
+								'book-surfer'
+							) }
 						</div>
 					</div>
 					<div className="bs-flex bs-gap-2">
 						<button
 							type="button"
 							className="bs-btn-primary"
-							onClick={ () => onSelect( { variant: 'allInOne', classInfo: null } ) }
+							onClick={ () =>
+								onSelect( {
+									variant: 'allInOne',
+									classInfo: null,
+								} )
+							}
 						>
 							{ __( 'Use this', 'book-surfer' ) }
 						</button>
@@ -94,7 +113,12 @@ export default function ClassList( {
 							<button
 								type="button"
 								className="button"
-								onClick={ () => onSelect( { variant: 'schedule', classInfo: null } ) }
+								onClick={ () =>
+									onSelect( {
+										variant: 'schedule',
+										classInfo: null,
+									} )
+								}
 							>
 								{ __( 'Schedule', 'book-surfer' ) }
 							</button>
@@ -107,17 +131,25 @@ export default function ClassList( {
 				<p className="bs-text-sm bs-text-slate-500">
 					{ query
 						? __( 'No classes match that search.', 'book-surfer' )
-						: __( 'No classes found. Add a class on booksurfer.in, then refresh.', 'book-surfer' ) }
+						: __(
+								'No classes found. Add a class on booksurfer.in, then refresh.',
+								'book-surfer'
+						  ) }
 				</p>
 			) }
 
 			<ul className="bs-space-y-2 bs-list-none bs-m-0 bs-p-0">
 				{ filtered.map( ( classItem ) => (
-					<li key={ String( classItem.id ) } className="bs-card bs-p-4">
+					<li
+						key={ String( classItem.id ) }
+						className="bs-card bs-p-4"
+					>
 						<div className="bs-flex bs-items-start bs-justify-between bs-gap-3">
 							<div className="bs-min-w-0">
 								<div className="bs-flex bs-items-center bs-gap-2">
-									<span className="bs-font-semibold bs-text-sm bs-truncate">{ classItem.name }</span>
+									<span className="bs-font-semibold bs-text-sm bs-truncate">
+										{ classItem.name }
+									</span>
 									{ classItem.class_type && (
 										<span className="bs-text-xs bs-bg-slate-100 bs-text-slate-600 bs-px-2 bs-py-0.5 bs-rounded">
 											{ classItem.class_type }
@@ -125,10 +157,17 @@ export default function ClassList( {
 									) }
 								</div>
 								<div className="bs-text-xs bs-text-slate-500 bs-mt-1 bs-flex bs-gap-3 bs-flex-wrap">
-									{ classItem.instructor && <span>{ classItem.instructor }</span> }
-									{ classItem.location && <span>{ classItem.location }</span> }
+									{ classItem.instructor && (
+										<span>{ classItem.instructor }</span>
+									) }
+									{ classItem.location && (
+										<span>{ classItem.location }</span>
+									) }
 									<span className="bs-font-medium bs-text-slate-700">
-										{ formatPrice( classItem.price, classItem.currency ) }
+										{ formatPrice(
+											classItem.price,
+											classItem.currency
+										) }
 									</span>
 								</div>
 							</div>
@@ -136,7 +175,12 @@ export default function ClassList( {
 								<button
 									type="button"
 									className="bs-btn-primary"
-									onClick={ () => onSelect( { variant: 'class', classInfo: classItem } ) }
+									onClick={ () =>
+										onSelect( {
+											variant: 'class',
+											classInfo: classItem,
+										} )
+									}
 								>
 									{ __( 'Use this', 'book-surfer' ) }
 								</button>
@@ -144,7 +188,12 @@ export default function ClassList( {
 									<button
 										type="button"
 										className="button"
-										onClick={ () => onSelect( { variant: 'schedule', classInfo: classItem } ) }
+										onClick={ () =>
+											onSelect( {
+												variant: 'schedule',
+												classInfo: classItem,
+											} )
+										}
 									>
 										{ __( 'Schedule', 'book-surfer' ) }
 									</button>

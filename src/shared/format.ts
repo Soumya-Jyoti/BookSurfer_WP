@@ -6,7 +6,7 @@
  * unused, and an inline INR-vs-USD-only branch that actually rendered. We keep the
  * richer one — same visible behaviour for INR/USD, plus EUR/GBP support.
  *
- * @package BookSurfer
+ * @package
  */
 
 export const CURRENCY_SYMBOLS: Record< string, string > = {
@@ -42,8 +42,13 @@ const GROUPING_LOCALE: Record< string, string > = {
  * - A zero price renders as "Free" (matching the Framer plugin's visible behaviour).
  * - A price that already carries a symbol is returned as-is.
  * - Otherwise the currency code selects a symbol (defaulting to $) and locale grouping.
+ * @param price
+ * @param currency
  */
-export function formatPrice( price: string | number | null | undefined, currency?: string ): string {
+export function formatPrice(
+	price: string | number | null | undefined,
+	currency?: string
+): string {
 	const raw = String( price ?? '' ).trim();
 	if ( ! raw ) {
 		return '—';

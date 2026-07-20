@@ -9,7 +9,7 @@
  * The Framer useCanInsert() gate is gone: permission is enforced server-side by the
  * REST route's edit_posts capability, not merely hidden in the UI.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { useBlockProps } from '@wordpress/block-editor';
@@ -22,7 +22,11 @@ import AllInOneStyleSelector from '@shared/components/AllInOneStyleSelector';
 import ClassList, { type ClassSelection } from '@shared/components/ClassList';
 import ErrorNotice from '@shared/components/ErrorNotice';
 import LayoutSelector from '@shared/components/LayoutSelector';
-import { DEFAULT_STYLING, type AllInOneStyle, type LayoutStyle } from '@shared/config';
+import {
+	DEFAULT_STYLING,
+	type AllInOneStyle,
+	type LayoutStyle,
+} from '@shared/config';
 import { buildEmbedUrl, resolveDimensions } from '@shared/embed';
 import type { ConnectionStatus } from '@shared/types';
 import { useClasses } from '@shared/use-classes';
@@ -35,16 +39,20 @@ interface EditProps {
 	setAttributes: ( next: Partial< BlockAttributes > ) => void;
 }
 
-const blockConfig = ( window as unknown as { BookSurferBlock?: { settingsUrl?: string } } ).BookSurferBlock;
+const blockConfig = (
+	window as unknown as { BookSurferBlock?: { settingsUrl?: string } }
+ ).BookSurferBlock;
 
 export default function Edit( { attributes, setAttributes }: EditProps ) {
 	const blockProps = useBlockProps();
 	const [ status, setStatus ] = useState< ConnectionStatus | null >( null );
 	const [ picking, setPicking ] = useState( false );
-	const [ pendingSelection, setPendingSelection ] = useState< ClassSelection | null >( null );
+	const [ pendingSelection, setPendingSelection ] =
+		useState< ClassSelection | null >( null );
 
 	const connected = status?.connected ?? false;
-	const { classes, studio, loading, error, refresh } = useClasses( connected );
+	const { classes, studio, loading, error, refresh } =
+		useClasses( connected );
 
 	useEffect( () => {
 		let active = true;
@@ -56,7 +64,12 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 			} )
 			.catch( () => {
 				if ( active ) {
-					setStatus( { connected: false, studio: null, needs_reconnect: false, pending: false } );
+					setStatus( {
+						connected: false,
+						studio: null,
+						needs_reconnect: false,
+						pending: false,
+					} );
 				}
 			} );
 		return () => {
@@ -64,7 +77,8 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 		};
 	}, [] );
 
-	const isConfigured = Boolean( attributes.embedUrl ) || Boolean( attributes.studioHandle );
+	const isConfigured =
+		Boolean( attributes.embedUrl ) || Boolean( attributes.studioHandle );
 
 	const previewSrc = useMemo(
 		() =>
@@ -88,7 +102,14 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 		]
 	);
 
-	/** Commit a full selection in ONE setAttributes call. */
+	/**
+	 * Commit a full selection in ONE setAttributes call.
+	 * @param variant
+	 * @param selection
+	 * @param options
+	 * @param options.layout
+	 * @param options.allInOneStyle
+	 */
 	const commit = (
 		variant: BlockAttributes[ 'variant' ],
 		selection: ClassSelection | null,
@@ -97,10 +118,16 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 		const handle = studio?.handle || attributes.studioHandle;
 		const classInfo = selection?.classInfo || null;
 		const layout = options.layout || attributes.layout || 'classic';
-		const allInOneStyle = options.allInOneStyle || attributes.allInOneStyle || 'sidebar';
+		const allInOneStyle =
+			options.allInOneStyle || attributes.allInOneStyle || 'sidebar';
 		const classId = classInfo ? String( classInfo.id ) : '';
 
-		const size = resolveDimensions( { variant, layout, allInOneStyle, classId } );
+		const size = resolveDimensions( {
+			variant,
+			layout,
+			allInOneStyle,
+			classId,
+		} );
 
 		setAttributes( {
 			variant,
@@ -108,7 +135,10 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 			classId,
 			classLabel: classInfo?.name || '',
 			// For the class variant the SaaS-provided embed_url is authoritative.
-			embedUrl: variant === 'class' && classInfo?.embed_url ? classInfo.embed_url : '',
+			embedUrl:
+				variant === 'class' && classInfo?.embed_url
+					? classInfo.embed_url
+					: '',
 			layout,
 			allInOneStyle,
 			width: size.width,
@@ -136,7 +166,10 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 	if ( ! status ) {
 		return (
 			<div { ...blockProps }>
-				<Placeholder icon={ calendar } label={ __( 'Book Surfer', 'book-surfer' ) }>
+				<Placeholder
+					icon={ calendar }
+					label={ __( 'Book Surfer', 'book-surfer' ) }
+				>
 					<Spinner />
 				</Placeholder>
 			</div>
@@ -155,7 +188,12 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 						'book-surfer'
 					) }
 				>
-					<Button variant="primary" href={ blockConfig?.settingsUrl } target="_blank" rel="noopener">
+					<Button
+						variant="primary"
+						href={ blockConfig?.settingsUrl }
+						target="_blank"
+						rel="noopener"
+					>
 						{ __( 'Open Book Surfer settings', 'book-surfer' ) }
 					</Button>
 				</Placeholder>
@@ -172,7 +210,11 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 					setAttributes={ setAttributes }
 					onChangeClass={ () => setPicking( true ) }
 				/>
-				<Preview src={ previewSrc } width={ attributes.width } height={ attributes.height } />
+				<Preview
+					src={ previewSrc }
+					width={ attributes.width }
+					height={ attributes.height }
+				/>
 			</div>
 		);
 	}
@@ -181,12 +223,20 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 	if ( pendingSelection?.variant === 'class' ) {
 		return (
 			<div { ...blockProps }>
-				<Placeholder icon={ calendar } label={ pendingSelection.classInfo?.name || __( 'Booking form', 'book-surfer' ) }>
+				<Placeholder
+					icon={ calendar }
+					label={
+						pendingSelection.classInfo?.name ||
+						__( 'Booking form', 'book-surfer' )
+					}
+				>
 					<div className="booksurfer-root bs-w-full">
 						<LayoutSelector
 							value={ attributes.layout }
 							onBack={ () => setPendingSelection( null ) }
-							onSelect={ ( layout ) => commit( 'class', pendingSelection, { layout } ) }
+							onSelect={ ( layout ) =>
+								commit( 'class', pendingSelection, { layout } )
+							}
 						/>
 					</div>
 				</Placeholder>
@@ -197,12 +247,19 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 	if ( pendingSelection?.variant === 'allInOne' ) {
 		return (
 			<div { ...blockProps }>
-				<Placeholder icon={ calendar } label={ __( 'All classes', 'book-surfer' ) }>
+				<Placeholder
+					icon={ calendar }
+					label={ __( 'All classes', 'book-surfer' ) }
+				>
 					<div className="booksurfer-root bs-w-full">
 						<AllInOneStyleSelector
 							value={ attributes.allInOneStyle }
 							onBack={ () => setPendingSelection( null ) }
-							onSelect={ ( allInOneStyle ) => commit( 'allInOne', pendingSelection, { allInOneStyle } ) }
+							onSelect={ ( allInOneStyle ) =>
+								commit( 'allInOne', pendingSelection, {
+									allInOneStyle,
+								} )
+							}
 						/>
 					</div>
 				</Placeholder>
@@ -216,7 +273,10 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 			<Placeholder
 				icon={ calendar }
 				label={ __( 'Book Surfer booking form', 'book-surfer' ) }
-				instructions={ __( 'Choose what to embed on this page.', 'book-surfer' ) }
+				instructions={ __(
+					'Choose what to embed on this page.',
+					'book-surfer'
+				) }
 			>
 				<div className="booksurfer-root bs-w-full">
 					{ error ? (
@@ -235,7 +295,10 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 						/>
 					) }
 					{ isConfigured && (
-						<Button variant="tertiary" onClick={ () => setPicking( false ) }>
+						<Button
+							variant="tertiary"
+							onClick={ () => setPicking( false ) }
+						>
 							{ __( 'Cancel', 'book-surfer' ) }
 						</Button>
 					) }

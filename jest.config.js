@@ -4,7 +4,7 @@
  * BSWP-46. Extends the @wordpress/scripts preset so TS/JSX and the wp.* globals
  * work the same way they do in the build.
  *
- * @package BookSurfer
+ * @package
  */
 
 const defaultConfig = require( '@wordpress/scripts/config/jest-unit.config' );

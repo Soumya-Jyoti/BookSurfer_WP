@@ -6,7 +6,7 @@
  * maps @wordpress/element to the wp.element global and emits an *.asset.php per
  * entry listing the real script dependencies and a content hash for cache busting.
  *
- * @package BookSurfer
+ * @package
  */
 
 const path = require( 'path' );

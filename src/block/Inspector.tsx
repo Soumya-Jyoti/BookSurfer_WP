@@ -5,7 +5,7 @@
  * invented here. embedUrl is never hand-edited; it is recomputed from attributes by
  * the shared builder on every change.
  *
- * @package BookSurfer
+ * @package
  */
 
 import {
@@ -15,6 +15,7 @@ import {
 	RangeControl,
 	SelectControl,
 	TextControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -39,18 +40,31 @@ interface Props {
 	onChangeClass: () => void;
 }
 
-export default function Inspector( { attributes, setAttributes, onChangeClass }: Props ) {
-	const { variant, layout, allInOneStyle, width, height, styling } = attributes;
+export default function Inspector( {
+	attributes,
+	setAttributes,
+	onChangeClass,
+}: Props ) {
+	const { variant, layout, allInOneStyle, width, height, styling } =
+		attributes;
 	const [ copied, setCopied ] = useState( false );
 
-	const currentStyling: Styling = { ...DEFAULT_STYLING, ...( styling || {} ) };
+	const currentStyling: Styling = {
+		...DEFAULT_STYLING,
+		...( styling || {} ),
+	};
 
 	const updateStyling = ( patch: Partial< Styling > ) =>
 		setAttributes( { styling: { ...currentStyling, ...patch } } );
 
 	/** Reset size to the current variant/layout defaults. */
 	const resetSize = () => {
-		const defaults = resolveDimensions( { variant, layout, allInOneStyle, classId: attributes.classId } );
+		const defaults = resolveDimensions( {
+			variant,
+			layout,
+			allInOneStyle,
+			classId: attributes.classId,
+		} );
 		setAttributes( { width: defaults.width, height: defaults.height } );
 	};
 
@@ -79,7 +93,8 @@ export default function Inspector( { attributes, setAttributes, onChangeClass }:
 			<PanelBody title={ __( 'Class', 'book-surfer' ) } initialOpen>
 				<PanelRow>
 					<span className="bs-text-xs">
-						{ attributes.classLabel || __( 'All classes', 'book-surfer' ) }
+						{ attributes.classLabel ||
+							__( 'All classes', 'book-surfer' ) }
 					</span>
 				</PanelRow>
 				<Button variant="secondary" onClick={ onChangeClass }>
@@ -88,15 +103,28 @@ export default function Inspector( { attributes, setAttributes, onChangeClass }:
 			</PanelBody>
 
 			{ variant === 'class' && (
-				<PanelBody title={ __( 'Layout', 'book-surfer' ) } initialOpen={ false }>
+				<PanelBody
+					title={ __( 'Layout', 'book-surfer' ) }
+					initialOpen={ false }
+				>
 					<SelectControl
 						label={ __( 'Layout', 'book-surfer' ) }
 						value={ layout }
-						options={ LAYOUTS.map( ( l ) => ( { label: l.name, value: l.id } ) ) }
+						options={ LAYOUTS.map( ( l ) => ( {
+							label: l.name,
+							value: l.id,
+						} ) ) }
 						onChange={ ( value ) => {
 							const next = value as LayoutStyle;
-							const size = resolveDimensions( { variant: 'class', layout: next } );
-							setAttributes( { layout: next, width: size.width, height: size.height } );
+							const size = resolveDimensions( {
+								variant: 'class',
+								layout: next,
+							} );
+							setAttributes( {
+								layout: next,
+								width: size.width,
+								height: size.height,
+							} );
 						} }
 						__nextHasNoMarginBottom
 					/>
@@ -104,35 +132,59 @@ export default function Inspector( { attributes, setAttributes, onChangeClass }:
 			) }
 
 			{ variant === 'allInOne' && (
-				<PanelBody title={ __( 'Style', 'book-surfer' ) } initialOpen={ false }>
+				<PanelBody
+					title={ __( 'Style', 'book-surfer' ) }
+					initialOpen={ false }
+				>
 					<SelectControl
 						label={ __( 'Style', 'book-surfer' ) }
 						value={ allInOneStyle }
-						options={ ALL_IN_ONE_STYLES.map( ( s ) => ( { label: s.name, value: s.id } ) ) }
+						options={ ALL_IN_ONE_STYLES.map( ( s ) => ( {
+							label: s.name,
+							value: s.id,
+						} ) ) }
 						onChange={ ( value ) => {
 							const next = value as AllInOneStyle;
-							const size = resolveDimensions( { variant: 'allInOne', allInOneStyle: next } );
-							setAttributes( { allInOneStyle: next, width: size.width, height: size.height } );
+							const size = resolveDimensions( {
+								variant: 'allInOne',
+								allInOneStyle: next,
+							} );
+							setAttributes( {
+								allInOneStyle: next,
+								width: size.width,
+								height: size.height,
+							} );
 						} }
 						__nextHasNoMarginBottom
 					/>
 				</PanelBody>
 			) }
 
-			<PanelBody title={ __( 'Size', 'book-surfer' ) } initialOpen={ false }>
+			<PanelBody
+				title={ __( 'Size', 'book-surfer' ) }
+				initialOpen={ false }
+			>
 				<NumberControl
 					label={ __( 'Width (px)', 'book-surfer' ) }
 					value={ width }
 					min={ 240 }
 					max={ 1600 }
-					onChange={ ( value?: string ) => setAttributes( { width: parseInt( value || '0', 10 ) || 0 } ) }
+					onChange={ ( value?: string ) =>
+						setAttributes( {
+							width: parseInt( value || '0', 10 ) || 0,
+						} )
+					}
 				/>
 				<NumberControl
 					label={ __( 'Height (px)', 'book-surfer' ) }
 					value={ height }
 					min={ 240 }
 					max={ 2000 }
-					onChange={ ( value?: string ) => setAttributes( { height: parseInt( value || '0', 10 ) || 0 } ) }
+					onChange={ ( value?: string ) =>
+						setAttributes( {
+							height: parseInt( value || '0', 10 ) || 0,
+						} )
+					}
 				/>
 				<Button variant="tertiary" onClick={ resetSize }>
 					{ __( 'Reset to default size', 'book-surfer' ) }
@@ -140,18 +192,25 @@ export default function Inspector( { attributes, setAttributes, onChangeClass }:
 			</PanelBody>
 
 			{ variant !== 'schedule' && (
-				<PanelBody title={ __( 'Styling', 'book-surfer' ) } initialOpen={ false }>
+				<PanelBody
+					title={ __( 'Styling', 'book-surfer' ) }
+					initialOpen={ false }
+				>
 					<TextControl
 						label={ __( 'Primary colour', 'book-surfer' ) }
 						value={ currentStyling.primary }
-						onChange={ ( value ) => updateStyling( { primary: value } ) }
+						onChange={ ( value ) =>
+							updateStyling( { primary: value } )
+						}
 						help={ __( 'Hex colour, e.g. #0D9488', 'book-surfer' ) }
 						__nextHasNoMarginBottom
 					/>
 					<TextControl
 						label={ __( 'Text colour', 'book-surfer' ) }
 						value={ currentStyling.text }
-						onChange={ ( value ) => updateStyling( { text: value } ) }
+						onChange={ ( value ) =>
+							updateStyling( { text: value } )
+						}
 						__nextHasNoMarginBottom
 					/>
 					<TextControl
@@ -163,8 +222,13 @@ export default function Inspector( { attributes, setAttributes, onChangeClass }:
 					<SelectControl
 						label={ __( 'Font', 'book-surfer' ) }
 						value={ currentStyling.font }
-						options={ FONT_PRESETS.map( ( f ) => ( { label: f, value: f } ) ) }
-						onChange={ ( value ) => updateStyling( { font: value } ) }
+						options={ FONT_PRESETS.map( ( f ) => ( {
+							label: f,
+							value: f as string,
+						} ) ) }
+						onChange={ ( value ) =>
+							updateStyling( { font: value } )
+						}
 						__nextHasNoMarginBottom
 					/>
 					<RangeControl
@@ -172,19 +236,31 @@ export default function Inspector( { attributes, setAttributes, onChangeClass }:
 						value={ currentStyling.radius }
 						min={ 0 }
 						max={ 64 }
-						onChange={ ( value ) => updateStyling( { radius: value ?? 0 } ) }
+						onChange={ ( value ) =>
+							updateStyling( { radius: value ?? 0 } )
+						}
 						__nextHasNoMarginBottom
 					/>
 				</PanelBody>
 			) }
 
-			<PanelBody title={ __( 'Shortcode', 'book-surfer' ) } initialOpen={ false }>
+			<PanelBody
+				title={ __( 'Shortcode', 'book-surfer' ) }
+				initialOpen={ false }
+			>
 				<p className="bs-text-xs">
-					{ __( 'Use this in a page builder or the Classic editor:', 'book-surfer' ) }
+					{ __(
+						'Use this in a page builder or the Classic editor:',
+						'book-surfer'
+					) }
 				</p>
-				<code className="bs-text-xs bs-block bs-mb-2 bs-break-all">{ shortcode }</code>
+				<code className="bs-text-xs bs-block bs-mb-2 bs-break-all">
+					{ shortcode }
+				</code>
 				<Button variant="secondary" onClick={ copyShortcode }>
-					{ copied ? __( 'Copied', 'book-surfer' ) : __( 'Copy shortcode', 'book-surfer' ) }
+					{ copied
+						? __( 'Copied', 'book-surfer' )
+						: __( 'Copy shortcode', 'book-surfer' ) }
 				</Button>
 			</PanelBody>
 		</InspectorControls>

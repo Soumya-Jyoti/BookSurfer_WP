@@ -4,7 +4,7 @@
  * BSWP-25/30. Ported from the Framer plugin's useClasses.ts interfaces — the proxy
  * passes the SaaS response through unchanged in shape, so these match 1:1.
  *
- * @package BookSurfer
+ * @package
  */
 
 export interface ClassInfo {

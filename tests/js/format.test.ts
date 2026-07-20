@@ -5,7 +5,7 @@
  * zero -> "Free", USD -> $ with en-US grouping, everything else -> ₹ with en-IN
  * grouping, plus the €/£ support the richer formatPrice adds.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { formatPrice } from '../../src/shared/format';

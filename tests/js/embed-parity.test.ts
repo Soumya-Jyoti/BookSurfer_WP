@@ -6,7 +6,7 @@
  * these suites goes red — which is the entire point. Do not "fix" a failure here by
  * editing the fixture; fix the builder that diverged.
  *
- * @package BookSurfer
+ * @package
  */
 
 import fixture from '../fixtures/embed-urls.json';
@@ -28,7 +28,10 @@ describe( 'buildEmbedUrl golden fixture', () => {
 	test.each( cases.map( ( c ) => [ c.name, c ] as [ string, FixtureCase ] ) )(
 		'%s',
 		( _name, testCase ) => {
-			const atts = { ...testCase.atts, apiBase: fixture.apiBase } as EmbedAttributes;
+			const atts = {
+				...testCase.atts,
+				apiBase: fixture.apiBase,
+			} as EmbedAttributes;
 			expect( buildEmbedUrl( atts ) ).toBe( testCase.expected );
 		}
 	);
@@ -66,13 +69,8 @@ describe( 'encoding parity rules', () => {
 			apiBase: fixture.apiBase,
 		} );
 		const query = url.split( '?' )[ 1 ];
-		expect( query.split( '&' ).map( ( p ) => p.split( '=' )[ 0 ] ) ).toEqual( [
-			'layout',
-			'primary',
-			'text',
-			'bg',
-			'font',
-			'radius',
-		] );
+		expect(
+			query.split( '&' ).map( ( p ) => p.split( '=' )[ 0 ] )
+		).toEqual( [ 'layout', 'primary', 'text', 'bg', 'font', 'radius' ] );
 	} );
 } );

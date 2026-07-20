@@ -11,7 +11,7 @@
  *
  * The front end ships ZERO Tailwind — the booking form is an iframe.
  *
- * @package BookSurfer
+ * @package
  */
 
 /** @type {import('tailwindcss').Config} */

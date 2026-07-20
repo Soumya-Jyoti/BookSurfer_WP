@@ -5,7 +5,7 @@
  * shortcode for the current selection. Emits only the attributes that differ from
  * the defaults, so the copied string stays readable.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { DEFAULT_STYLING, type Styling, type Variant } from './config';
@@ -31,7 +31,11 @@ export function buildShortcode( atts: ShortcodeAttributes ): string {
 		parts.push( `variant="${ variant }"` );
 	}
 
-	if ( atts.classId !== undefined && atts.classId !== '' && variant !== 'allInOne' ) {
+	if (
+		atts.classId !== undefined &&
+		atts.classId !== '' &&
+		variant !== 'allInOne'
+	) {
 		parts.push( `id="${ String( atts.classId ) }"` );
 	}
 
@@ -39,7 +43,11 @@ export function buildShortcode( atts: ShortcodeAttributes ): string {
 		parts.push( `layout="${ atts.layout }"` );
 	}
 
-	if ( variant === 'allInOne' && atts.allInOneStyle && atts.allInOneStyle !== 'sidebar' ) {
+	if (
+		variant === 'allInOne' &&
+		atts.allInOneStyle &&
+		atts.allInOneStyle !== 'sidebar'
+	) {
 		parts.push( `style="${ atts.allInOneStyle }"` );
 	}
 

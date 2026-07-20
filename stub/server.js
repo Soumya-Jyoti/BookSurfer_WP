@@ -18,7 +18,7 @@
  *   GET  /api/widget/classes  (Bearer)       -> 200 { success, classes, studio } | 401
  *   GET  /api/:handle/book[/:id] | /schedule[/:id] -> a fake rendered form (for iframes)
  *
- * @package BookSurfer
+ * @package
  */
 
 'use strict';
@@ -87,7 +87,10 @@ function mintTokens() {
 	tokenCounter += 1;
 	const access = `stub-access-${ tokenCounter }-${ Date.now() }`;
 	const refresh = `stub-refresh-${ tokenCounter }-${ Date.now() }`;
-	accessTokens.set( access, { studio: STUDIO, expiresAt: Date.now() + 1800 * 1000 } );
+	accessTokens.set( access, {
+		studio: STUDIO,
+		expiresAt: Date.now() + 1800 * 1000,
+	} );
 	refreshTokens.set( refresh, { studio: STUDIO } );
 	return { access_token: access, refresh_token: refresh, expires_in: 1800 };
 }
@@ -123,8 +126,16 @@ function readBody( req ) {
 }
 
 function escapeHtml( value ) {
-	return String( value ).replace( /[&<>"']/g, ( c ) =>
-		( { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } )[ c ]
+	return String( value ).replace(
+		/[&<>"']/g,
+		( c ) =>
+			( {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#39;',
+			} )[ c ]
 	);
 }
 
@@ -133,7 +144,6 @@ function escapeHtml( value ) {
 /* ------------------------------------------------------------------------ */
 
 function consentPage( url, res ) {
-	const state = url.searchParams.get( 'state' );
 	const origin = url.searchParams.get( 'origin' ) || '';
 	const host = url.pathname.split( '/' )[ 2 ];
 
@@ -141,6 +151,8 @@ function consentPage( url, res ) {
 	if ( ! [ 'wordpress', 'framer', 'webflow' ].includes( host ) ) {
 		return html( res, 400, '<h1>Bad host</h1>' );
 	}
+
+	const state = url.searchParams.get( 'state' );
 	if ( ! state || ! /^[A-Za-z0-9_-]{32,64}$/.test( state ) ) {
 		return html( res, 400, '<h1>Missing or malformed state</h1>' );
 	}
@@ -161,13 +173,17 @@ function consentPage( url, res ) {
 		<body style="font-family:system-ui;max-width:420px;margin:40px auto;text-align:center">
 		<h1 style="font-size:20px">Book Surfer (stub)</h1>
 		<p>Approve access for:</p>
-		<p><code style="background:#f1f5f9;padding:4px 8px;border-radius:4px">${ escapeHtml( origin ) }</code></p>
+		<p><code style="background:#f1f5f9;padding:4px 8px;border-radius:4px">${ escapeHtml(
+			origin
+		) }</code></p>
 		<p style="color:#64748b;font-size:13px">Host: ${ escapeHtml( host ) }</p>
 		<form method="POST" action="/connect/${ escapeHtml( host ) }/approve">
 			<input type="hidden" name="state" value="${ escapeHtml( state ) }">
 			<button style="background:#0d9488;color:#fff;border:0;padding:10px 20px;border-radius:6px;cursor:pointer">Approve</button>
 		</form>
-		<form method="POST" action="/connect/${ escapeHtml( host ) }/deny" style="margin-top:8px">
+		<form method="POST" action="/connect/${ escapeHtml(
+			host
+		) }/deny" style="margin-top:8px">
 			<input type="hidden" name="state" value="${ escapeHtml( state ) }">
 			<button style="background:none;border:0;color:#64748b;cursor:pointer;text-decoration:underline">Deny</button>
 		</form>
@@ -233,9 +249,17 @@ async function handleExchange( req, res ) {
 	// Rate limiting, tuned for a polling client.
 	record.attempts += 1;
 	if ( record.attempts > RATE_MAX_ATTEMPTS ) {
-		return json( res, 429, { error: 'too_many_attempts' }, { 'Retry-After': '5' } );
+		return json(
+			res,
+			429,
+			{ error: 'too_many_attempts' },
+			{ 'Retry-After': '5' }
+		);
 	}
-	if ( RATE_MIN_INTERVAL_MS > 0 && Date.now() - record.lastAttemptAt < RATE_MIN_INTERVAL_MS ) {
+	if (
+		RATE_MIN_INTERVAL_MS > 0 &&
+		Date.now() - record.lastAttemptAt < RATE_MIN_INTERVAL_MS
+	) {
 		return json( res, 429, { error: 'slow_down' }, { 'Retry-After': '2' } );
 	}
 	record.lastAttemptAt = Date.now();
@@ -289,7 +313,11 @@ function handleClasses( req, res ) {
 		return json( res, 401, { error: 'token_expired' } );
 	}
 
-	return json( res, 200, { success: true, classes: CLASSES, studio: STUDIO } );
+	return json( res, 200, {
+		success: true,
+		classes: CLASSES,
+		studio: STUDIO,
+	} );
 }
 
 /* ------------------------------------------------------------------------ */
@@ -309,12 +337,24 @@ function renderForm( url, res ) {
 		res,
 		200,
 		`<!doctype html><meta charset="utf-8"><title>Booking form (stub)</title>
-		<body data-testid="booksurfer-stub-form" style="margin:0;background:${ escapeHtml( bg ) };color:${ escapeHtml( text ) };font-family:${ escapeHtml( font ) },system-ui">
+		<body data-testid="booksurfer-stub-form" style="margin:0;background:${ escapeHtml(
+			bg
+		) };color:${ escapeHtml( text ) };font-family:${ escapeHtml(
+			font
+		) },system-ui">
 		<div style="padding:24px;border-radius:${ escapeHtml( radius ) }px">
-			<h1 style="font-size:18px;color:${ escapeHtml( primary ) }">Book Surfer (stub form)</h1>
-			<p data-testid="stub-path" style="font-size:12px">${ escapeHtml( url.pathname ) }</p>
-			<p data-testid="stub-layout" style="font-size:12px">layout: ${ escapeHtml( layout ) }</p>
-			<button style="background:${ escapeHtml( primary ) };color:#fff;border:0;padding:10px 18px;border-radius:6px">Book now</button>
+			<h1 style="font-size:18px;color:${ escapeHtml(
+				primary
+			) }">Book Surfer (stub form)</h1>
+			<p data-testid="stub-path" style="font-size:12px">${ escapeHtml(
+				url.pathname
+			) }</p>
+			<p data-testid="stub-layout" style="font-size:12px">layout: ${ escapeHtml(
+				layout
+			) }</p>
+			<button style="background:${ escapeHtml(
+				primary
+			) };color:#fff;border:0;padding:10px 18px;border-radius:6px">Book now</button>
 		</div></body>`
 	);
 }
@@ -330,7 +370,10 @@ const server = http.createServer( async ( req, res ) => {
 	// CORS is irrelevant for the WordPress server-to-server path, but keep it open
 	// so the same stub can serve browser-based hosts too.
 	res.setHeader( 'Access-Control-Allow-Origin', '*' );
-	res.setHeader( 'Access-Control-Allow-Headers', 'Content-Type, Authorization' );
+	res.setHeader(
+		'Access-Control-Allow-Headers',
+		'Content-Type, Authorization'
+	);
 	if ( req.method === 'OPTIONS' ) {
 		res.writeHead( 204 );
 		return res.end();
@@ -347,20 +390,35 @@ const server = http.createServer( async ( req, res ) => {
 		if ( req.method === 'GET' && /^\/connect\/[^/]+$/.test( pathname ) ) {
 			return consentPage( url, res );
 		}
-		if ( req.method === 'POST' && /^\/connect\/[^/]+\/approve$/.test( pathname ) ) {
+		if (
+			req.method === 'POST' &&
+			/^\/connect\/[^/]+\/approve$/.test( pathname )
+		) {
 			return handleApprove( req, res, true );
 		}
-		if ( req.method === 'POST' && /^\/connect\/[^/]+\/deny$/.test( pathname ) ) {
+		if (
+			req.method === 'POST' &&
+			/^\/connect\/[^/]+\/deny$/.test( pathname )
+		) {
 			return handleApprove( req, res, false );
 		}
 
-		if ( req.method === 'POST' && pathname === '/api/oauth/plugin/exchange' ) {
+		if (
+			req.method === 'POST' &&
+			pathname === '/api/oauth/plugin/exchange'
+		) {
 			return handleExchange( req, res );
 		}
-		if ( req.method === 'POST' && pathname === '/api/oauth/plugin/refresh' ) {
+		if (
+			req.method === 'POST' &&
+			pathname === '/api/oauth/plugin/refresh'
+		) {
 			return handleRefresh( req, res );
 		}
-		if ( req.method === 'POST' && pathname === '/api/oauth/plugin/revoke' ) {
+		if (
+			req.method === 'POST' &&
+			pathname === '/api/oauth/plugin/revoke'
+		) {
 			return handleRevoke( req, res );
 		}
 		if ( req.method === 'GET' && pathname === '/api/widget/classes' ) {
@@ -368,13 +426,19 @@ const server = http.createServer( async ( req, res ) => {
 		}
 
 		// Public embed URLs: /api/{handle}/book[/{id}] and /api/{handle}/schedule[/{id}]
-		if ( req.method === 'GET' && /^\/api\/[^/]+\/(book|schedule)(\/[^/]+)?$/.test( pathname ) ) {
+		if (
+			req.method === 'GET' &&
+			/^\/api\/[^/]+\/(book|schedule)(\/[^/]+)?$/.test( pathname )
+		) {
 			return renderForm( url, res );
 		}
 
 		return json( res, 404, { error: 'not_found', path: pathname } );
 	} catch ( err ) {
-		return json( res, 500, { error: 'stub_error', message: String( err ) } );
+		return json( res, 500, {
+			error: 'stub_error',
+			message: String( err ),
+		} );
 	}
 } );
 
@@ -383,7 +447,11 @@ server.listen( PORT, HOST, () => {
 	console.log( `Book Surfer stub listening on http://${ HOST }:${ PORT }` );
 	console.log( '' );
 	console.log( 'Point the plugin at it:' );
-	console.log( `  add_filter( 'booksurfer_api_base', fn() => 'http://${ HOST }:${ PORT }/api' );` );
-	console.log( `  add_filter( 'booksurfer_app_base', fn() => 'http://${ HOST }:${ PORT }' );` );
+	console.log(
+		`  add_filter( 'booksurfer_api_base', fn() => 'http://${ HOST }:${ PORT }/api' );`
+	);
+	console.log(
+		`  add_filter( 'booksurfer_app_base', fn() => 'http://${ HOST }:${ PORT }' );`
+	);
 	/* eslint-enable no-console */
 } );

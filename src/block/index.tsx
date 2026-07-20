@@ -5,15 +5,19 @@
  * emits the iframe, so a change to the URL builder fixes every published page at
  * once rather than leaving stale saved markup behind.
  *
- * @package BookSurfer
+ * @package
  */
 
-import { registerBlockType } from '@wordpress/blocks';
+import { registerBlockType, type BlockConfiguration } from '@wordpress/blocks';
 import metadata from './block.json';
 import Edit from './edit';
+import type { BlockAttributes } from './types';
 import './editor.css';
 
-registerBlockType( metadata.name, {
-	edit: Edit,
-	save: () => null,
-} );
+registerBlockType(
+	metadata as unknown as BlockConfiguration< BlockAttributes >,
+	{
+		edit: Edit,
+		save: () => null,
+	}
+);

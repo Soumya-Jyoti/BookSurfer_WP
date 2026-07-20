@@ -6,7 +6,7 @@
  * server-side and handed to us; a client-minted state would let an attacker drive
  * the exchange.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
@@ -86,7 +86,12 @@ export function useConnect(
 				if ( Date.now() > deadline ) {
 					stopPolling();
 					setState( 'failed' );
-					setError( __( 'Connection timed out. Please try connecting again.', 'book-surfer' ) );
+					setError(
+						__(
+							'Connection timed out. Please try connecting again.',
+							'book-surfer'
+						)
+					);
 					return;
 				}
 
@@ -127,7 +132,9 @@ export function useConnect(
 						stopPolling();
 						if ( mountedRef.current ) {
 							setState( 'idle' );
-							setError( __( 'Connection was cancelled.', 'book-surfer' ) );
+							setError(
+								__( 'Connection was cancelled.', 'book-surfer' )
+							);
 						}
 					}
 				}
@@ -151,9 +158,15 @@ export function useConnect(
 			return;
 		}
 
-		const url = `${ connectUrl }?state=${ encodeURIComponent( stateToken ) }&origin=${ encodeURIComponent( origin ) }`;
+		const url = `${ connectUrl }?state=${ encodeURIComponent(
+			stateToken
+		) }&origin=${ encodeURIComponent( origin ) }`;
 
-		const popup = window.open( url, 'booksurfer-connect', 'width=520,height=680,menubar=no,toolbar=no' );
+		const popup = window.open(
+			url,
+			'booksurfer-connect',
+			'width=520,height=680,menubar=no,toolbar=no'
+		);
 		popupRef.current = popup;
 
 		if ( ! popup ) {

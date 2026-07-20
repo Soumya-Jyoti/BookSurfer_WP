@@ -6,7 +6,7 @@
  * the iframe. A load timeout falls back to a reassuring message rather than an
  * empty box — the front end will still render.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { Disabled } from '@wordpress/components';
@@ -41,7 +41,10 @@ export default function Preview( { src, width, height }: Props ) {
 		if ( timeoutRef.current ) {
 			clearTimeout( timeoutRef.current );
 		}
-		timeoutRef.current = setTimeout( () => setTimedOut( true ), LOAD_TIMEOUT_MS );
+		timeoutRef.current = setTimeout(
+			() => setTimedOut( true ),
+			LOAD_TIMEOUT_MS
+		);
 		return () => {
 			if ( timeoutRef.current ) {
 				clearTimeout( timeoutRef.current );
@@ -55,8 +58,14 @@ export default function Preview( { src, width, height }: Props ) {
 
 	if ( timedOut && ! loaded ) {
 		return (
-			<div className="booksurfer-block-skeleton" style={ { height: Math.min( height, 240 ) } }>
-				{ __( 'Preview unavailable — the form will still render on the front end.', 'book-surfer' ) }
+			<div
+				className="booksurfer-block-skeleton"
+				style={ { height: Math.min( height, 240 ) } }
+			>
+				{ __(
+					'Preview unavailable — the form will still render on the front end.',
+					'book-surfer'
+				) }
 			</div>
 		);
 	}

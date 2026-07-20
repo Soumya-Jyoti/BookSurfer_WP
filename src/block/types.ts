@@ -3,10 +3,15 @@
  *
  * BSWP-29. Mirrors src/block/block.json — keep the two in step.
  *
- * @package BookSurfer
+ * @package
  */
 
-import type { AllInOneStyle, LayoutStyle, Styling, Variant } from '@shared/config';
+import type {
+	AllInOneStyle,
+	LayoutStyle,
+	Styling,
+	Variant,
+} from '@shared/config';
 
 export interface BlockAttributes {
 	variant: Variant;

@@ -5,11 +5,12 @@
  * needs exactly one error component rather than a switch per call site. It switches
  * on the machine `code`, never on the message text.
  *
- * @package BookSurfer
+ * @package
  */
 
 import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import type { ComponentProps } from 'react';
 import type { NormalizedError } from '../types';
 
 interface Props {
@@ -19,8 +20,12 @@ interface Props {
 	settingsUrl?: string;
 }
 
+type NoticeAction = NonNullable<
+	ComponentProps< typeof Notice >[ 'actions' ]
+>[ number ];
+
 export default function ErrorNotice( { error, onRetry, settingsUrl }: Props ) {
-	const actions = [] as Array< { label: string; onClick?: () => void; url?: string; variant?: string } >;
+	const actions: NoticeAction[] = [];
 
 	switch ( error.code ) {
 		case 'booksurfer_not_connected':
@@ -36,7 +41,10 @@ export default function ErrorNotice( { error, onRetry, settingsUrl }: Props ) {
 		case 'booksurfer_rate_limited':
 		default:
 			if ( onRetry ) {
-				actions.push( { label: __( 'Try again', 'book-surfer' ), onClick: onRetry } );
+				actions.push( {
+					label: __( 'Try again', 'book-surfer' ),
+					onClick: onRetry,
+				} );
 			}
 			break;
 	}
