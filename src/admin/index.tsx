@@ -10,7 +10,7 @@
 
 import { createRoot } from '@wordpress/element';
 import App from './App';
-import './style.css';
+import './app.css';
 
 const container = document.getElementById( 'booksurfer-admin-root' );
 
