@@ -8,6 +8,8 @@
  * @package
  */
 
+import { __ } from '@wordpress/i18n';
+
 export type LayoutStyle = 'classic' | 'modern' | 'minimal' | 'compact';
 export type AllInOneStyle = 'sidebar' | 'dropdown';
 export type Variant = 'class' | 'allInOne' | 'schedule';
@@ -68,17 +70,25 @@ export const LAYOUTS: Array< {
 	name: string;
 	description: string;
 } > = [
-	{ id: 'classic', name: 'Classic', description: 'Standard list layout' },
-	{ id: 'modern', name: 'Modern', description: 'Clean cards with shadows' },
+	{
+		id: 'classic',
+		name: __( 'Classic', 'book-surfer' ),
+		description: __( 'Standard list layout', 'book-surfer' ),
+	},
+	{
+		id: 'modern',
+		name: __( 'Modern', 'book-surfer' ),
+		description: __( 'Clean cards with shadows', 'book-surfer' ),
+	},
 	{
 		id: 'minimal',
-		name: 'Minimalist',
-		description: 'Simple and typography-focused',
+		name: __( 'Minimalist', 'book-surfer' ),
+		description: __( 'Simple and typography-focused', 'book-surfer' ),
 	},
 	{
 		id: 'compact',
-		name: 'Compact',
-		description: 'Tight layout for small spaces',
+		name: __( 'Compact', 'book-surfer' ),
+		description: __( 'Tight layout for small spaces', 'book-surfer' ),
 	},
 ];
 
@@ -90,12 +100,18 @@ export const ALL_IN_ONE_STYLES: Array< {
 } > = [
 	{
 		id: 'sidebar',
-		name: 'Sidebar',
-		description: 'Class list on the left, details + form on the right',
+		name: __( 'Sidebar', 'book-surfer' ),
+		description: __(
+			'Class list on the left, details + form on the right',
+			'book-surfer'
+		),
 	},
 	{
 		id: 'dropdown',
-		name: 'Dropdown',
-		description: 'Compact single column; pick the class from a dropdown',
+		name: __( 'Dropdown', 'book-surfer' ),
+		description: __(
+			'Compact single column; pick the class from a dropdown',
+			'book-surfer'
+		),
 	},
 ];

@@ -251,6 +251,50 @@
 				"studioHandle": "demo-studio"
 			},
 			"expected": ""
+		},
+		{
+			"name": "class / a colliding layout param in the base is overwritten in place (not duplicated)",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42?layout=modern",
+				"layout": "compact"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=compact&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / a colliding styling param in the base is overwritten in place, keeping its position",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://api.booksurfer.in/api/demo-studio/book/42?primary=112233",
+				"layout": "classic",
+				"styling": { "primary": "#445566" }
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?primary=445566&layout=classic&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / embedUrl on a foreign host is rejected (SSRF) and the URL is rebuilt from handle + id",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "42",
+				"embedUrl": "https://evil.example.com/api/demo-studio/book/42",
+				"layout": "classic"
+			},
+			"expected": "https://api.booksurfer.in/api/demo-studio/book/42?layout=classic&primary=0D9488&text=1e293b&bg=ffffff&font=Roboto&radius=14"
+		},
+		{
+			"name": "class / foreign-host embedUrl with no valid class id renders nothing",
+			"atts": {
+				"variant": "class",
+				"studioHandle": "demo-studio",
+				"classId": "not/valid",
+				"embedUrl": "https://evil.example.com/x"
+			},
+			"expected": ""
 		}
 	]
 }

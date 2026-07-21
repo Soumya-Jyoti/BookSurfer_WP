@@ -185,7 +185,10 @@ class Token_Store {
 	/**
 	 * Get the connected studio metadata.
 	 *
-	 * @return array{handle:string,name:string}|null
+	 * The connected_at value is a Unix timestamp (seconds) of the first successful
+	 * connect, surfaced so the admin panel can show "Connected since …" (BSWP-26).
+	 *
+	 * @return array{handle:string,name:string,connected_at:int}|null
 	 */
 	public function get_studio() {
 		$data = $this->get();
@@ -193,8 +196,9 @@ class Token_Store {
 			return null;
 		}
 		return array(
-			'handle' => (string) ( $data['studio_handle'] ?? '' ),
-			'name'   => (string) ( $data['studio_name'] ?? '' ),
+			'handle'       => (string) ( $data['studio_handle'] ?? '' ),
+			'name'         => (string) ( $data['studio_name'] ?? '' ),
+			'connected_at' => (int) ( $data['connected_at'] ?? 0 ),
 		);
 	}
 

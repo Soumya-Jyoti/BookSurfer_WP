@@ -272,8 +272,11 @@ class Rest {
 	 * @return \WP_REST_Response
 	 */
 	public function disconnect() {
-		$this->oauth->revoke();
+		// Clear the class cache first: its key derives from the studio handle, which
+		// revoke() wipes — clearing after revoke would target a null-studio key and
+		// leak the cached list until it expired (defect 5).
 		$this->proxy->clear_cache();
+		$this->oauth->revoke();
 		Lifecycle::flush_transients();
 
 		return new \WP_REST_Response( array( 'connected' => false ), 200 );

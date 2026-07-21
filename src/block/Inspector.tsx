@@ -76,6 +76,7 @@ export default function Inspector( {
 		width,
 		height,
 		styling: currentStyling,
+		studioHandle: attributes.studioHandle,
 	} );
 
 	const copyShortcode = async () => {

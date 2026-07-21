@@ -97,47 +97,67 @@ function hasKey< T extends object >( object: T, key: unknown ): key is keyof T {
 }
 
 /**
- * Split a URL into its base and an ordered list of existing query pairs.
+ * Whether a URL's host matches the API base host.
+ *
+ * BSWP-44 SSRF guard: a SaaS-provided embedUrl is only trusted as an iframe base
+ * when it points at the same host as the API base — otherwise an authored or
+ * imported block could aim an allow="payment" iframe at any origin. Mirrors
+ * booksurfer_is_allowed_embed_url() in helpers-embed.php so both builders reject the
+ * same inputs and the parity gate stays honest.
+ * @param url
+ * @param apiBase
+ */
+function hostMatches( url: string, apiBase: string ): boolean {
+	try {
+		return (
+			new URL( url ).hostname.toLowerCase() ===
+			new URL( apiBase ).hostname.toLowerCase()
+		);
+	} catch {
+		return false;
+	}
+}
+
+/**
+ * Split a URL into its base and an ordered map of existing query params (last value
+ * wins per key), mirroring PHP booksurfer_strip_query().
  * @param url
  */
 function stripQuery( url: string ): {
 	base: string;
-	pairs: Array< [ string, string ] >;
+	query: Map< string, string >;
 } {
+	const query = new Map< string, string >();
 	const hash = url.indexOf( '?' );
 	if ( hash === -1 ) {
-		return { base: url, pairs: [] };
+		return { base: url, query };
 	}
 	const base = url.slice( 0, hash );
 	const qs = url.slice( hash + 1 );
-	const pairs: Array< [ string, string ] > = [];
 	if ( qs ) {
 		for ( const part of qs.split( '&' ) ) {
 			const eq = part.indexOf( '=' );
 			const key = eq === -1 ? part : part.slice( 0, eq );
 			const raw = eq === -1 ? '' : part.slice( eq + 1 );
-			pairs.push( [
+			query.set(
 				decodeURIComponent( key ),
-				decodeURIComponent( raw.replace( /\+/g, ' ' ) ),
-			] );
+				decodeURIComponent( raw.replace( /\+/g, ' ' ) )
+			);
 		}
 	}
-	return { base, pairs };
+	return { base, query };
 }
 
 function appendStyling(
-	pairs: Array< [ string, string ] >,
+	query: Map< string, string >,
 	styling?: Partial< Styling >
 ): void {
 	const s = { ...DEFAULT_STYLING, ...( styling || {} ) };
-	pairs.push( [ 'primary', String( s.primary ).replace( '#', '' ) ] );
-	pairs.push( [ 'text', String( s.text ).replace( '#', '' ) ] );
-	pairs.push( [ 'bg', String( s.bg ).replace( '#', '' ) ] );
-	pairs.push( [ 'font', String( s.font ) ] );
-	pairs.push( [
-		'radius',
-		String( parseInt( String( s.radius ), 10 ) || 0 ),
-	] );
+	query.set( 'primary', String( s.primary ).replace( '#', '' ) );
+	query.set( 'text', String( s.text ).replace( '#', '' ) );
+	query.set( 'bg', String( s.bg ).replace( '#', '' ) );
+	query.set( 'font', String( s.font ) );
+	query.set( 'radius', String( parseInt( String( s.radius ), 10 ) || 0 ) );
 }
 
 /**
@@ -152,7 +172,7 @@ export function buildEmbedUrl( atts: EmbedAttributes ): string {
 	const api = getApiBase( atts.apiBase ).replace( /\/$/, '' );
 
 	let base = '';
-	let pairs: Array< [ string, string ] > = [];
+	let query = new Map< string, string >();
 
 	switch ( variant ) {
 		case 'class': {
@@ -160,10 +180,14 @@ export function buildEmbedUrl( atts: EmbedAttributes ): string {
 				? atts.layout
 				: 'classic';
 			const provided = String( atts.embedUrl || '' );
-			if ( provided && provided.indexOf( 'http' ) === 0 ) {
+			if (
+				provided &&
+				provided.indexOf( 'http' ) === 0 &&
+				hostMatches( provided, api )
+			) {
 				const stripped = stripQuery( provided );
 				base = stripped.base;
-				pairs = stripped.pairs;
+				query = stripped.query;
 			} else {
 				const classId = sanitizeClassId( atts.classId );
 				if ( ! handle || ! classId ) {
@@ -171,8 +195,8 @@ export function buildEmbedUrl( atts: EmbedAttributes ): string {
 				}
 				base = `${ api }/${ handle }/book/${ classId }`;
 			}
-			pairs.push( [ 'layout', layout ] );
-			appendStyling( pairs, atts.styling );
+			query.set( 'layout', layout );
+			appendStyling( query, atts.styling );
 			break;
 		}
 
@@ -188,9 +212,9 @@ export function buildEmbedUrl( atts: EmbedAttributes ): string {
 				: 'sidebar';
 			base = `${ api }/${ handle }/book`;
 			if ( ALL_IN_ONE_CONFIG[ style ].style !== '' ) {
-				pairs.push( [ 'style', ALL_IN_ONE_CONFIG[ style ].style ] );
+				query.set( 'style', ALL_IN_ONE_CONFIG[ style ].style );
 			}
-			appendStyling( pairs, atts.styling );
+			appendStyling( query, atts.styling );
 			break;
 		}
 
@@ -210,15 +234,15 @@ export function buildEmbedUrl( atts: EmbedAttributes ): string {
 			return '';
 	}
 
-	if ( pairs.length === 0 ) {
+	if ( query.size === 0 ) {
 		return base;
 	}
 
-	const query = pairs
+	const queryString = [ ...query ]
 		.map( ( [ key, value ] ) => `${ key }=${ encodeParam( value ) }` )
 		.join( '&' );
 	const separator = base.indexOf( '?' ) === -1 ? '?' : '&';
-	return `${ base }${ separator }${ query }`;
+	return `${ base }${ separator }${ queryString }`;
 }
 
 /**

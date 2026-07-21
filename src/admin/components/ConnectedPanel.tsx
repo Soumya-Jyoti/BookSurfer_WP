@@ -9,7 +9,7 @@
 
 import { Modal, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { disconnect as disconnectRequest, normalizeError } from '@shared/api';
 import type { BootstrapData, ConnectionStatus } from '@shared/types';
 
@@ -62,6 +62,17 @@ export default function ConnectedPanel( {
 							</span>
 						) }
 					</div>
+					{ status.studio?.connected_at ? (
+						<p className="bs-text-xs bs-text-slate-500 bs-mt-1 bs-mb-0">
+							{ sprintf(
+								/* translators: %s: the date the site connected to Book Surfer. */
+								__( 'Connected since %s', 'book-surfer' ),
+								new Date(
+									status.studio.connected_at * 1000
+								).toLocaleDateString()
+							) }
+						</p>
+					) : null }
 					<p className="bs-text-xs bs-text-slate-500 bs-mt-2 bs-mb-0">
 						{ __(
 							'Classes, bookings and payments are managed on booksurfer.in. This plugin only embeds your forms.',

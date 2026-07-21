@@ -48,6 +48,28 @@ if ( ! function_exists( 'booksurfer_api_base' ) ) {
 	}
 }
 
+if ( ! function_exists( 'booksurfer_is_allowed_embed_url' ) ) {
+	/**
+	 * Whether a SaaS-provided embedUrl may be trusted as the iframe base: it must
+	 * point at the same host as the API base.
+	 *
+	 * BSWP-44 SSRF guard for the class variant. Without this, an authored or imported
+	 * block could set embedUrl to any origin and the resulting allow="payment" iframe
+	 * would load it — esc_url() constrains the protocol but not the host. Mirrors
+	 * hostMatches() in src/shared/embed.ts so both builders reject the same inputs.
+	 *
+	 * @param string $url Candidate embed URL.
+	 * @return bool
+	 */
+	function booksurfer_is_allowed_embed_url( $url ) {
+		$host = wp_parse_url( (string) $url, PHP_URL_HOST );
+		$base = wp_parse_url( booksurfer_api_base(), PHP_URL_HOST );
+		return is_string( $host ) && '' !== $host
+			&& is_string( $base ) && '' !== $base
+			&& strtolower( $host ) === strtolower( $base );
+	}
+}
+
 if ( ! function_exists( 'booksurfer_layout_config' ) ) {
 	/**
 	 * Per-class booking-form layouts and their default sizes.
@@ -212,9 +234,10 @@ if ( ! function_exists( 'booksurfer_build_embed_url' ) ) {
 					$layout = 'classic';
 				}
 
-				// Prefer the SaaS-provided base URL (byte-exact parity for the block).
+				// Prefer the SaaS-provided base URL (byte-exact parity for the block),
+				// but only when it points at our own API host (BSWP-44 SSRF guard).
 				$provided = isset( $atts['embedUrl'] ) ? (string) $atts['embedUrl'] : '';
-				if ( '' !== $provided && 0 === strpos( $provided, 'http' ) ) {
+				if ( '' !== $provided && 0 === strpos( $provided, 'http' ) && booksurfer_is_allowed_embed_url( $provided ) ) {
 					$base = booksurfer_strip_query( $provided, $query );
 				} else {
 					$class_id = booksurfer_sanitize_class_id( $atts['classId'] ?? '' );
@@ -277,7 +300,12 @@ if ( ! function_exists( 'booksurfer_build_embed_url' ) ) {
 if ( ! function_exists( 'booksurfer_strip_query' ) ) {
 	/**
 	 * Split a base URL into its path portion and merge any existing query params
-	 * into $query (preserving their order), so we can re-emit deterministically.
+	 * into $query (preserving their order, last value winning per key), so we can
+	 * re-emit deterministically.
+	 *
+	 * Splits manually on '&'/'=' rather than parse_str() so the result is identical
+	 * to the JS twin (stripQuery in embed.ts): parse_str() rewrites `a.b`/`a b` keys
+	 * to `a_b`, folds `a[]` into arrays, and would silently break byte-parity.
 	 *
 	 * @param string               $url   Source URL.
 	 * @param array<string,string> $query Query accumulator (by reference).
@@ -288,12 +316,17 @@ if ( ! function_exists( 'booksurfer_strip_query' ) ) {
 		if ( false === $hash ) {
 			return $url;
 		}
-		$base   = substr( $url, 0, $hash );
-		$qs     = substr( $url, $hash + 1 );
-		$parsed = array();
-		parse_str( $qs, $parsed );
-		foreach ( $parsed as $key => $value ) {
-			$query[ $key ] = is_array( $value ) ? reset( $value ) : $value;
+		$base = substr( $url, 0, $hash );
+		$qs   = substr( $url, $hash + 1 );
+		if ( '' !== $qs ) {
+			foreach ( explode( '&', $qs ) as $part ) {
+				$eq  = strpos( $part, '=' );
+				$key = ( false === $eq ) ? $part : substr( $part, 0, $eq );
+				$raw = ( false === $eq ) ? '' : substr( $part, $eq + 1 );
+				// rawurldecode leaves '+' intact (keys); urldecode maps '+' -> space
+				// (values) — matching decodeURIComponent(key) / value.replace(+, ' ').
+				$query[ rawurldecode( $key ) ] = urldecode( $raw );
+			}
 		}
 		return $base;
 	}
@@ -310,7 +343,7 @@ if ( ! function_exists( 'booksurfer_append_styling' ) ) {
 	 */
 	function booksurfer_append_styling( array &$query, array $styling ) {
 		$defaults = booksurfer_default_styling();
-		$styling  = array_merge( $defaults, is_array( $styling ) ? $styling : array() );
+		$styling  = array_merge( $defaults, $styling );
 
 		$query['primary'] = preg_replace( '/#/', '', (string) $styling['primary'], 1 );
 		$query['text']    = preg_replace( '/#/', '', (string) $styling['text'], 1 );
@@ -342,7 +375,10 @@ if ( ! function_exists( 'booksurfer_resolve_dimensions' ) ) {
 		switch ( $variant ) {
 			case 'allInOne':
 				$config = booksurfer_all_in_one_config();
-				$style  = isset( $config[ $atts['allInOneStyle'] ?? 'sidebar' ] ) ? $atts['allInOneStyle'] : 'sidebar';
+				$style  = isset( $atts['allInOneStyle'] ) ? (string) $atts['allInOneStyle'] : 'sidebar';
+				if ( ! isset( $config[ $style ] ) ) {
+					$style = 'sidebar';
+				}
 				return array(
 					'width'  => $config[ $style ]['width'],
 					'height' => $config[ $style ]['height'],
@@ -354,7 +390,10 @@ if ( ! function_exists( 'booksurfer_resolve_dimensions' ) ) {
 			case 'class':
 			default:
 				$layouts = booksurfer_layout_config();
-				$layout  = isset( $layouts[ $atts['layout'] ?? 'classic' ] ) ? $atts['layout'] : 'classic';
+				$layout  = isset( $atts['layout'] ) ? (string) $atts['layout'] : 'classic';
+				if ( ! isset( $layouts[ $layout ] ) ) {
+					$layout = 'classic';
+				}
 				return $layouts[ $layout ];
 		}
 	}
@@ -373,6 +412,13 @@ if ( ! function_exists( 'booksurfer_render_embed' ) ) {
 	 * @return string
 	 */
 	function booksurfer_render_embed( array $atts, $wrapper_attributes = '' ) {
+		// BSWP-37: an iframe must never render in a feed, REST, or AMP context —
+		// even a fully valid one. Feeds/AMP can't run the embed and REST payloads
+		// aren't HTML surfaces.
+		if ( booksurfer_is_suppressed_context() ) {
+			return '';
+		}
+
 		$src = booksurfer_build_embed_url( $atts );
 		if ( '' === $src ) {
 			return booksurfer_render_misconfigured_notice();
@@ -396,6 +442,30 @@ if ( ! function_exists( 'booksurfer_render_embed' ) ) {
 	}
 }
 
+if ( ! function_exists( 'booksurfer_is_suppressed_context' ) ) {
+	/**
+	 * Contexts where the booking iframe must not render at all: RSS/Atom feeds,
+	 * REST responses, and AMP pages. BSWP-37.
+	 *
+	 * @return bool
+	 */
+	function booksurfer_is_suppressed_context() {
+		if ( function_exists( 'is_feed' ) && is_feed() ) {
+			return true;
+		}
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return true;
+		}
+		if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
+			return true;
+		}
+		if ( function_exists( 'is_amp_endpoint' ) && is_amp_endpoint() ) {
+			return true;
+		}
+		return false;
+	}
+}
+
 if ( ! function_exists( 'booksurfer_render_misconfigured_notice' ) ) {
 	/**
 	 * BSWP-37: logged-in editors see an inline notice on a misconfigured embed;
@@ -404,7 +474,7 @@ if ( ! function_exists( 'booksurfer_render_misconfigured_notice' ) ) {
 	 * @return string
 	 */
 	function booksurfer_render_misconfigured_notice() {
-		if ( is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		if ( booksurfer_is_suppressed_context() ) {
 			return '';
 		}
 		if ( function_exists( 'is_admin' ) && is_admin() ) {

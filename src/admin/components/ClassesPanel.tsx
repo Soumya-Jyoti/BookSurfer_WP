@@ -41,6 +41,7 @@ export default function ClassesPanel() {
 				buildShortcode( {
 					variant: 'schedule',
 					classId: next.classInfo?.id,
+					studioHandle: studio?.handle,
 				} )
 			);
 			return;
@@ -115,6 +116,7 @@ export default function ClassesPanel() {
 									variant: 'class',
 									classId: selection.classInfo?.id,
 									layout,
+									studioHandle: studio?.handle,
 								} )
 							)
 						}
@@ -131,6 +133,7 @@ export default function ClassesPanel() {
 								buildShortcode( {
 									variant: 'allInOne',
 									allInOneStyle: style,
+									studioHandle: studio?.handle,
 								} )
 							)
 						}

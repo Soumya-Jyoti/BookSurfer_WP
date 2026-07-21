@@ -9,6 +9,8 @@
  * @package
  */
 
+import { __ } from '@wordpress/i18n';
+
 export const CURRENCY_SYMBOLS: Record< string, string > = {
 	inr: '₹',
 	rupee: '₹',
@@ -56,7 +58,7 @@ export function formatPrice(
 
 	const numeric = Number( raw );
 	if ( ! Number.isNaN( numeric ) && numeric === 0 ) {
-		return 'Free';
+		return __( 'Free', 'book-surfer' );
 	}
 
 	// Already symbol-prefixed — trust it.
@@ -74,7 +76,7 @@ export function formatPrice(
 		return `${ symbol }${ numericPart }`;
 	}
 	if ( parsed === 0 ) {
-		return 'Free';
+		return __( 'Free', 'book-surfer' );
 	}
 
 	const locale = GROUPING_LOCALE[ symbol ] ?? 'en-US';

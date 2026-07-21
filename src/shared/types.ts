@@ -35,7 +35,12 @@ export interface ClassesResponse {
 
 export interface ConnectionStatus {
 	connected: boolean;
-	studio: { handle: string; name: string } | null;
+	studio: {
+		handle: string;
+		name: string;
+		/** Unix timestamp (seconds) of the first successful connect. */
+		connected_at?: number;
+	} | null;
 	needs_reconnect: boolean;
 	pending: boolean;
 	degraded?: boolean;

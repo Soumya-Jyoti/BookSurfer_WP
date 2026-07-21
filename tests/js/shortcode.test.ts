@@ -92,4 +92,15 @@ describe( 'buildShortcode', () => {
 			} )
 		).toBe( '[booksurfer variant="schedule" id="42"]' );
 	} );
+
+	it( 'emits the studio handle so a published form survives a disconnect (defect 4)', () => {
+		expect(
+			buildShortcode( {
+				variant: 'class',
+				classId: '42',
+				layout: 'classic',
+				studioHandle: 'demo-studio',
+			} )
+		).toBe( '[booksurfer id="42" handle="demo-studio"]' );
+	} );
 } );
