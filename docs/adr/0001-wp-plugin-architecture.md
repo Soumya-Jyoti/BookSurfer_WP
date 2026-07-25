@@ -132,6 +132,22 @@ exposes `prefix`, `important` and `corePlugins.preflight` directly, which is exa
 the scoping this decision needs. `@wordpress/components` is still used for genuinely
 native controls (Inspector panels, Notice, Modal) so they inherit editor styling.
 
+### Build: two independent entry points, no shared chunk (BSWP-39)
+
+The build (`@wordpress/scripts`, replacing Vite) emits two entries — `build/block/index`
+and `build/admin/index` — and **deliberately does not split `src/shared/` into its own
+webpack chunk**, even though both entries import from it. The two entries never load on the
+same screen (wp-admin settings vs. the block editor), so a shared chunk would save nothing
+at runtime. More importantly, WordPress enqueues each entry from the script handles and
+content hash in its own `*.asset.php`; a separate shared chunk would have no `*.asset.php`
+entry, would never be enqueued, and the bundle would break at runtime with a missing module.
+Each entry therefore inlines the shared code it uses. Shared *source* still lives in one
+place (`src/shared/`, aliased `@shared`) — this is purely a bundling decision, not a
+duplication of logic. Rationale is mirrored inline in `webpack.config.js`.
+
+This amends the BSWP-39 acceptance criteria, which originally called for a shared chunk;
+the AC was updated to match (see the plugin build plan).
+
 ### Connect polling target
 
 The browser polls `POST /booksurfer/v1/connect` (with the state) every 2 seconds,
