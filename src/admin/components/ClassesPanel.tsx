@@ -85,12 +85,10 @@ export default function ClassesPanel() {
 						onRemove={ () => setShortcode( null ) }
 					>
 						<div className="bs-flex bs-items-center bs-gap-2 bs-flex-wrap">
-							<code className="bs-text-xs bs-bg-white bs-px-2 bs-py-1 bs-rounded bs-border">
-								{ shortcode }
-							</code>
+							<code className="bs-code">{ shortcode }</code>
 							<button
 								type="button"
-								className="button button-small"
+								className="bs-btn-secondary bs-btn-sm"
 								onClick={ copy }
 							>
 								{ copied

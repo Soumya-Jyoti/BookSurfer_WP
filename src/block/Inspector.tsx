@@ -91,9 +91,12 @@ export default function Inspector( {
 
 	return (
 		<InspectorControls>
+			{ /* InspectorControls renders into the sidebar, outside the block
+			     wrapper — so anything using a bs- utility needs its own
+			     .booksurfer-root scope (see tailwind.config.js). */ }
 			<PanelBody title={ __( 'Class', 'book-surfer' ) } initialOpen>
 				<PanelRow>
-					<span className="bs-text-xs">
+					<span className="booksurfer-root bs-text-xs">
 						{ attributes.classLabel ||
 							__( 'All classes', 'book-surfer' ) }
 					</span>
@@ -249,15 +252,15 @@ export default function Inspector( {
 				title={ __( 'Shortcode', 'book-surfer' ) }
 				initialOpen={ false }
 			>
-				<p className="bs-text-xs">
-					{ __(
-						'Use this in a page builder or the Classic editor:',
-						'book-surfer'
-					) }
-				</p>
-				<code className="bs-text-xs bs-block bs-mb-2 bs-break-all">
-					{ shortcode }
-				</code>
+				<div className="booksurfer-root">
+					<p className="bs-text-xs bs-mt-0">
+						{ __(
+							'Use this in a page builder or the Classic editor:',
+							'book-surfer'
+						) }
+					</p>
+					<code className="bs-code bs-mb-3">{ shortcode }</code>
+				</div>
 				<Button variant="secondary" onClick={ copyShortcode }>
 					{ copied
 						? __( 'Copied', 'book-surfer' )

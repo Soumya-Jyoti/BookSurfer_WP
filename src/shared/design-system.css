@@ -1,0 +1,434 @@
+/**
+ * The Book Surfer design system — brand tokens plus the component
+ * vocabulary shared by the admin settings page and the block editor UI.
+ *
+ * BSWP-27. This file exists because the vocabulary used to live in
+ * src/admin/app.css, which is only bundled into the admin entry. The
+ * block editor loaded src/block/editor.css, got the Tailwind utilities
+ * but none of .bs-card / .bs-btn-primary, and rendered the shared
+ * components unstyled. Both entries import this now — do not redefine a
+ * .bs-* component class anywhere else.
+ *
+ * Load order matters: each entry imports this BEFORE its own @tailwind
+ * utilities, so at the equal specificity Tailwind's
+ * important:'.booksurfer-root' produces, a utility wins over a component
+ * class.
+ *
+ * Every rule is scoped under .booksurfer-root, matching the guarantee in
+ * tailwind.config.js: nothing here can bleed into wp-admin or the canvas.
+ */
+
+/* Tokens ------------------------------------------------------------- */
+
+/* --bs-brand is DEFAULT_STYLING.primary in src/shared/config.ts; keep the
+   two in step so the chrome matches the form it frames. The neutrals are
+   slate, anchored on DEFAULT_STYLING.text. */
+.booksurfer-root {
+	--bs-brand: #0d9488;
+	--bs-brand-hover: #0f766e;
+	--bs-brand-active: #115e59;
+	--bs-brand-subtle: #f0fdfa;
+	--bs-brand-subtle-border: #99f6e4;
+	--bs-text: #1e293b;
+	--bs-text-muted: #64748b;
+	--bs-text-subtle: #94a3b8;
+	--bs-surface: #fff;
+	--bs-surface-sunken: #f8fafc;
+	--bs-border: #e2e8f0;
+	--bs-border-strong: #cbd5e1;
+	--bs-radius: 10px;
+	--bs-radius-sm: 6px;
+	--bs-radius-pill: 999px;
+	--bs-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+	--bs-shadow-md: 0 6px 16px rgba(15, 23, 42, 0.1);
+	--bs-ring: 0 0 0 3px rgba(13, 148, 136, 0.18);
+	color: var(--bs-text);
+}
+
+.booksurfer-root *,
+.booksurfer-root *::before,
+.booksurfer-root *::after {
+	box-sizing: border-box;
+}
+
+/* Surfaces ----------------------------------------------------------- */
+
+.booksurfer-root .bs-card {
+	background: var(--bs-surface);
+	border: 1px solid var(--bs-border);
+	border-radius: var(--bs-radius);
+	box-shadow: var(--bs-shadow-sm);
+}
+
+/* A row the user is meant to act on: lifts and takes the brand edge. */
+.booksurfer-root .bs-card-interactive {
+	transition:
+		border-color 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.booksurfer-root .bs-card-interactive:hover,
+.booksurfer-root .bs-card-interactive:focus-within {
+	border-color: var(--bs-brand);
+	box-shadow: var(--bs-shadow-md);
+}
+
+/* The one card that outranks the others — the all-in-one form. The tint
+   is background-image so .bs-card's white background still shows under
+   the fade. */
+.booksurfer-root .bs-card-feature {
+	background-image: linear-gradient(var(--bs-brand-subtle), transparent);
+	border-color: var(--bs-brand-subtle-border);
+}
+
+.booksurfer-root .bs-avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 36px;
+	height: 36px;
+	border-radius: var(--bs-radius);
+	background: var(--bs-brand);
+	color: #fff;
+}
+
+.booksurfer-root .bs-avatar svg {
+	fill: currentcolor;
+}
+
+/* Buttons ------------------------------------------------------------ */
+
+/*
+ * Each variant carries the base rules rather than requiring a .bs-btn
+ * companion class, so `className="bs-btn-primary"` alone is always
+ * complete markup.
+ *
+ * These deliberately do NOT lean on wp-admin's .button: a block theme
+ * renders the editor canvas in an iframe that never loads wp-admin's
+ * stylesheet, so a .button inside the block would arrive naked.
+ */
+.booksurfer-root .bs-btn,
+.booksurfer-root .bs-btn-primary,
+.booksurfer-root .bs-btn-secondary,
+.booksurfer-root .bs-btn-ghost,
+.booksurfer-root .bs-btn-danger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 36px;
+	padding: 8px 14px;
+	border: 1px solid transparent;
+	border-radius: var(--bs-radius-sm);
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+	text-decoration: none;
+	cursor: pointer;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.booksurfer-root .bs-btn-sm {
+	min-height: 32px;
+	padding: 6px 12px;
+	font-size: 12px;
+}
+
+.booksurfer-root .bs-btn svg,
+.booksurfer-root .bs-btn-primary svg,
+.booksurfer-root .bs-btn-secondary svg,
+.booksurfer-root .bs-btn-ghost svg,
+.booksurfer-root .bs-btn-danger svg {
+	fill: currentcolor;
+	flex-shrink: 0;
+}
+
+/*
+ * Variant colours first, then :disabled, then :focus-visible, then the
+ * hover rules. Ascending specificity — :hover:not(:disabled) outranks a
+ * bare :disabled, so writing them in any other order silently breaks the
+ * disabled state (and trips stylelint's no-descending-specificity).
+ */
+.booksurfer-root .bs-btn-primary {
+	background: var(--bs-brand);
+	color: #fff;
+}
+
+.booksurfer-root .bs-btn-secondary {
+	background: var(--bs-surface);
+	border-color: var(--bs-border-strong);
+	color: var(--bs-text);
+}
+
+.booksurfer-root .bs-btn-ghost {
+	background: transparent;
+	color: var(--bs-text-muted);
+}
+
+/* Destructive confirmation only — never a dialog's default action. */
+.booksurfer-root .bs-btn-danger {
+	background: #b91c1c;
+	color: #fff;
+}
+
+.booksurfer-root .bs-btn:disabled,
+.booksurfer-root .bs-btn-primary:disabled,
+.booksurfer-root .bs-btn-secondary:disabled,
+.booksurfer-root .bs-btn-ghost:disabled,
+.booksurfer-root .bs-btn-danger:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.booksurfer-root .bs-btn:focus-visible,
+.booksurfer-root .bs-btn-primary:focus-visible,
+.booksurfer-root .bs-btn-secondary:focus-visible,
+.booksurfer-root .bs-btn-ghost:focus-visible,
+.booksurfer-root .bs-btn-danger:focus-visible {
+	outline: 2px solid var(--bs-brand);
+	outline-offset: 2px;
+}
+
+.booksurfer-root .bs-btn-primary:hover:not(:disabled) {
+	background: var(--bs-brand-hover);
+	color: #fff;
+}
+
+.booksurfer-root .bs-btn-primary:active:not(:disabled) {
+	background: var(--bs-brand-active);
+}
+
+.booksurfer-root .bs-btn-secondary:hover:not(:disabled) {
+	background: var(--bs-surface-sunken);
+	border-color: var(--bs-brand);
+	color: var(--bs-brand-active);
+}
+
+.booksurfer-root .bs-btn-ghost:hover:not(:disabled) {
+	background: var(--bs-surface-sunken);
+	color: var(--bs-text);
+}
+
+.booksurfer-root .bs-btn-danger:hover:not(:disabled) {
+	background: #991b1b;
+	color: #fff;
+}
+
+/* Option cards (layout / style pickers) ------------------------------ */
+
+.booksurfer-root .bs-option {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 100%;
+	padding: 12px 14px;
+	text-align: left;
+	background: var(--bs-surface);
+	border: 1px solid var(--bs-border);
+	border-radius: var(--bs-radius);
+	box-shadow: var(--bs-shadow-sm);
+	cursor: pointer;
+	transition:
+		border-color 0.15s ease,
+		box-shadow 0.15s ease,
+		background-color 0.15s ease;
+}
+
+.booksurfer-root .bs-option:hover {
+	border-color: var(--bs-brand);
+	box-shadow: var(--bs-shadow-md);
+}
+
+.booksurfer-root .bs-option:focus-visible {
+	outline: 2px solid var(--bs-brand);
+	outline-offset: 2px;
+}
+
+/* aria-pressed IS the selection state — no is-selected class to drift. */
+.booksurfer-root .bs-option[aria-pressed="true"] {
+	background: var(--bs-brand-subtle);
+	border-color: var(--bs-brand);
+	box-shadow: var(--bs-ring);
+}
+
+.booksurfer-root .bs-option__title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--bs-text);
+}
+
+.booksurfer-root .bs-option__title svg {
+	fill: var(--bs-brand);
+	flex-shrink: 0;
+}
+
+.booksurfer-root .bs-option__desc {
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--bs-text-muted);
+}
+
+.booksurfer-root .bs-option__size {
+	margin-top: 2px;
+	font-size: 11px;
+	color: var(--bs-text-subtle);
+	font-variant-numeric: tabular-nums;
+}
+
+/* Text, badges and metadata ------------------------------------------ */
+
+.booksurfer-root .bs-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--bs-text);
+}
+
+.booksurfer-root .bs-meta {
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--bs-text-muted);
+}
+
+.booksurfer-root .bs-meta-list {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 12px;
+	font-size: 12px;
+	color: var(--bs-text-muted);
+}
+
+.booksurfer-root .bs-meta-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+}
+
+.booksurfer-root .bs-meta-item svg {
+	fill: currentcolor;
+	opacity: 0.65;
+	flex-shrink: 0;
+}
+
+.booksurfer-root .bs-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 8px;
+	border: 1px solid var(--bs-border);
+	border-radius: var(--bs-radius-pill);
+	background: var(--bs-surface-sunken);
+	color: var(--bs-text-muted);
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.booksurfer-root .bs-price {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 8px;
+	border-radius: var(--bs-radius-pill);
+	background: var(--bs-brand-subtle);
+	color: var(--bs-brand-active);
+	font-size: 12px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+/*
+ * Shortcode output. A component class rather than Tailwind's border
+ * utilities: with preflight off there is no `border-style: solid` reset,
+ * so `bs-border` sets a width against a `none` style and draws nothing.
+ */
+.booksurfer-root .bs-code {
+	display: block;
+	padding: 8px 10px;
+	border: 1px solid var(--bs-border);
+	border-radius: var(--bs-radius-sm);
+	background: var(--bs-surface-sunken);
+	color: var(--bs-text);
+	font-size: 11px;
+	line-height: 1.5;
+	word-break: break-all;
+}
+
+/* Layout helpers ----------------------------------------------------- */
+
+/*
+ * A long class list must not turn the block placeholder into an endless
+ * scroll of the page itself. The negative margin cancels the padding,
+ * which is only there so focus rings and hover shadows are not clipped.
+ */
+.booksurfer-root .bs-scroller {
+	max-height: 26rem;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 3px;
+	margin: -3px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--bs-border-strong) transparent;
+}
+
+.booksurfer-root .bs-scroller::-webkit-scrollbar {
+	width: 8px;
+}
+
+.booksurfer-root .bs-scroller::-webkit-scrollbar-thumb {
+	background: var(--bs-border-strong);
+	border-radius: var(--bs-radius-pill);
+}
+
+.booksurfer-root .bs-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 28px 20px;
+	border: 1px dashed var(--bs-border-strong);
+	border-radius: var(--bs-radius);
+	background: var(--bs-surface-sunken);
+	text-align: center;
+}
+
+.booksurfer-root .bs-empty svg {
+	fill: var(--bs-text-subtle);
+}
+
+/* Motion ------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+	.booksurfer-root .bs-card-interactive,
+	.booksurfer-root .bs-option,
+	.booksurfer-root .bs-btn,
+	.booksurfer-root .bs-btn-primary,
+	.booksurfer-root .bs-btn-secondary,
+	.booksurfer-root .bs-btn-ghost,
+	.booksurfer-root .bs-btn-danger {
+		transition: none;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.booksurfer-root .bs-spin {
+		animation: booksurfer-spin 1s linear infinite;
+	}
+}
+
+@keyframes booksurfer-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
