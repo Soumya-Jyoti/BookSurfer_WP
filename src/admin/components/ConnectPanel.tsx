@@ -84,7 +84,11 @@ export default function ConnectPanel( { bootstrap, onConnected }: Props ) {
 				</button>
 				{ busy && <Spinner /> }
 				{ ( state === 'failed' || state === 'popup-blocked' ) && (
-					<button type="button" className="button" onClick={ reset }>
+					<button
+						type="button"
+						className="bs-btn-secondary"
+						onClick={ reset }
+					>
 						{ __( 'Cancel', 'book-surfer' ) }
 					</button>
 				) }

@@ -10,6 +10,9 @@
 
 import { createRoot } from '@wordpress/element';
 import App from './App';
+// Order matters: the design system must precede app.css's @tailwind utilities so a
+// utility class still beats a .bs-* component class. See design-system.css.
+import '@shared/design-system.css';
 import './app.css';
 
 const container = document.getElementById( 'booksurfer-admin-root' );

@@ -1,63 +1,22 @@
 /**
- * Admin styles.
+ * Admin-only styles.
  *
- * BSWP-27. Tailwind is injected with preflight disabled, a bs- prefix, and every
- * rule scoped under .booksurfer-root (see tailwind.config.js), so nothing here can
- * bleed into wp-admin — or be trampled by it.
+ * BSWP-27. Tailwind is injected with preflight disabled, a bs- prefix, and
+ * every rule scoped under .booksurfer-root (see tailwind.config.js), so
+ * nothing here can bleed into wp-admin — or be trampled by it.
+ *
+ * The shared brand tokens and .bs-* component vocabulary live in
+ * src/shared/design-system.css, imported by index.tsx BEFORE this file so
+ * the utilities below still win. Only page-shell rules belong here.
  */
 
 @tailwind components;
 @tailwind utilities;
 
-.booksurfer-root {
-	--bs-brand: #0d9488;
+/* The settings-page shell. Deliberately not in the design system: the
+   block editor mounts .booksurfer-root inside a canvas that must not be
+   width-capped. */
+.booksurfer-admin {
 	max-width: 1100px;
 	margin: 20px 20px 0 0;
-	color: #1e293b;
-}
-
-.booksurfer-root *,
-.booksurfer-root *::before,
-.booksurfer-root *::after {
-	box-sizing: border-box;
-}
-
-/* A minimal, deliberately scoped card/button vocabulary — replaces the Framer
-   plugin's premium-card / btn-primary classes without pulling in preflight. */
-.booksurfer-root .bs-card {
-	background: #fff;
-	border: 1px solid #e2e8f0;
-	border-radius: 10px;
-	box-shadow: 0 1px 2px rgba( 0, 0, 0, 0.04 );
-}
-
-.booksurfer-root .bs-btn-primary {
-	background: var( --bs-brand );
-	color: #fff;
-	border: 0;
-	border-radius: 6px;
-	padding: 8px 16px;
-	font-weight: 600;
-	cursor: pointer;
-}
-
-.booksurfer-root .bs-btn-primary:hover:not( :disabled ) {
-	background: #0f766e;
-}
-
-.booksurfer-root .bs-btn-primary:disabled {
-	opacity: 0.6;
-	cursor: not-allowed;
-}
-
-@media ( prefers-reduced-motion: no-preference ) {
-	.booksurfer-root .bs-spin {
-		animation: booksurfer-spin 1s linear infinite;
-	}
-}
-
-@keyframes booksurfer-spin {
-	to {
-		transform: rotate( 360deg );
-	}
 }

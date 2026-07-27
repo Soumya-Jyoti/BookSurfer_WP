@@ -13,7 +13,7 @@
  */
 
 import { useBlockProps } from '@wordpress/block-editor';
-import { Button, Placeholder, Spinner } from '@wordpress/components';
+import { Placeholder, Spinner } from '@wordpress/components';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { calendar } from '@wordpress/icons';
@@ -44,7 +44,10 @@ const blockConfig = (
  ).BookSurferBlock;
 
 export default function Edit( { attributes, setAttributes }: EditProps ) {
-	const blockProps = useBlockProps();
+	// booksurfer-root is the design system's scope (tokens + the important: selector
+	// in tailwind.config.js). Putting it on the wrapper covers the placeholder chrome
+	// as well as our own markup. Editor-only — save() returns null.
+	const blockProps = useBlockProps( { className: 'booksurfer-root' } );
 	const [ status, setStatus ] = useState< ConnectionStatus | null >( null );
 	const [ picking, setPicking ] = useState( false );
 	const [ pendingSelection, setPendingSelection ] =
@@ -170,7 +173,12 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 					icon={ calendar }
 					label={ __( 'Book Surfer', 'book-surfer' ) }
 				>
-					<Spinner />
+					<div className="bs-flex bs-items-center bs-gap-2 bs-w-full">
+						<Spinner />
+						<span className="bs-meta">
+							{ __( 'Checking your studio…', 'book-surfer' ) }
+						</span>
+					</div>
 				</Placeholder>
 			</div>
 		);
@@ -188,14 +196,14 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 						'book-surfer'
 					) }
 				>
-					<Button
-						variant="primary"
+					<a
+						className="bs-btn-primary"
 						href={ blockConfig?.settingsUrl }
 						target="_blank"
-						rel="noopener"
+						rel="noopener noreferrer"
 					>
 						{ __( 'Open Book Surfer settings', 'book-surfer' ) }
-					</Button>
+					</a>
 				</Placeholder>
 			</div>
 		);
@@ -230,7 +238,7 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 						__( 'Booking form', 'book-surfer' )
 					}
 				>
-					<div className="booksurfer-root bs-w-full">
+					<div className="bs-w-full">
 						<LayoutSelector
 							value={ attributes.layout }
 							onBack={ () => setPendingSelection( null ) }
@@ -251,7 +259,7 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 					icon={ calendar }
 					label={ __( 'All classes', 'book-surfer' ) }
 				>
-					<div className="booksurfer-root bs-w-full">
+					<div className="bs-w-full">
 						<AllInOneStyleSelector
 							value={ attributes.allInOneStyle }
 							onBack={ () => setPendingSelection( null ) }
@@ -278,7 +286,7 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 					'book-surfer'
 				) }
 			>
-				<div className="booksurfer-root bs-w-full">
+				<div className="bs-w-full">
 					{ error ? (
 						<ErrorNotice
 							error={ error }
@@ -295,12 +303,15 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 						/>
 					) }
 					{ isConfigured && (
-						<Button
-							variant="tertiary"
-							onClick={ () => setPicking( false ) }
-						>
-							{ __( 'Cancel', 'book-surfer' ) }
-						</Button>
+						<div className="bs-mt-4 bs-flex bs-justify-end">
+							<button
+								type="button"
+								className="bs-btn-ghost bs-btn-sm"
+								onClick={ () => setPicking( false ) }
+							>
+								{ __( 'Cancel', 'book-surfer' ) }
+							</button>
+						</div>
 					) }
 				</div>
 			</Placeholder>

@@ -1,17 +1,70 @@
 /**
  * Editor-only styles for the Book Surfer block.
  *
- * BSWP-27/40. Loaded via block.json's editorStyle — the editor only. The front end
- * ships zero CSS from this block; the booking form is an iframe.
+ * BSWP-27/40. Loaded via block.json's editorStyle — the editor only. The
+ * front end ships zero CSS from this block; the form is an iframe.
+ *
+ * The brand tokens and .bs-* component vocabulary come from
+ * src/shared/design-system.css, imported by index.tsx BEFORE this file so
+ * the utilities below still win. What is left here is the block's chrome.
  */
 
 @tailwind components;
 @tailwind utilities;
 
+/* Placeholder chrome ------------------------------------------------- */
+
+/*
+ * edit() puts .booksurfer-root on the block wrapper, so the design-system
+ * tokens are in scope here. Scoping to the block class as well keeps
+ * these rules off every other block's placeholder.
+ */
+.wp-block-booksurfer-booking-form .components-placeholder {
+	padding: 20px;
+	border: 1px solid var(--bs-border);
+	border-radius: 12px;
+	background: var(--bs-surface);
+	box-shadow: var(--bs-shadow-sm);
+	color: var(--bs-text);
+}
+
+.wp-block-booksurfer-booking-form .components-placeholder__label {
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 4px;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--bs-text);
+}
+
+.wp-block-booksurfer-booking-form .components-placeholder__label svg {
+	fill: var(--bs-brand);
+}
+
+.wp-block-booksurfer-booking-form .components-placeholder__instructions {
+	margin-bottom: 16px;
+	font-size: 13px;
+	color: var(--bs-text-muted);
+}
+
+.wp-block-booksurfer-booking-form .components-placeholder__fieldset {
+	width: 100%;
+	max-width: 100%;
+}
+
+/* The search control fills its toolbar cell; its own width rules would
+   otherwise collapse it next to the refresh button. */
+.wp-block-booksurfer-booking-form .components-search-control {
+	width: 100%;
+}
+
+/* Live preview ------------------------------------------------------- */
+
 .booksurfer-block-preview {
 	position: relative;
 	max-width: 100%;
 	overflow: hidden;
+	border-radius: 12px;
 }
 
 .booksurfer-block-preview iframe {
@@ -24,7 +77,7 @@
 	justify-content: center;
 	background: #f1f5f9;
 	border: 1px solid #e2e8f0;
-	border-radius: 8px;
+	border-radius: 12px;
 	color: #64748b;
 	font-size: 13px;
 }

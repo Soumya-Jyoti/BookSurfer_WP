@@ -81,9 +81,9 @@ export default function ConnectedPanel( {
 					</p>
 				</div>
 
-				<div className="bs-flex bs-gap-2">
+				<div className="bs-flex bs-gap-2 bs-flex-wrap">
 					<a
-						className="button button-secondary"
+						className="bs-btn-primary"
 						href={ bootstrap.dashboardUrl }
 						target="_blank"
 						rel="noopener noreferrer"
@@ -92,7 +92,7 @@ export default function ConnectedPanel( {
 					</a>
 					<button
 						type="button"
-						className="button"
+						className="bs-btn-secondary"
 						onClick={ () => setConfirming( true ) }
 					>
 						{ __( 'Disconnect', 'book-surfer' ) }
@@ -107,44 +107,48 @@ export default function ConnectedPanel( {
 						working ? undefined : setConfirming( false )
 					}
 				>
-					<p className="bs-text-sm">
-						{ __(
-							'Booking forms already published on your pages will keep working — they are public Book Surfer links.',
-							'book-surfer'
-						) }
-					</p>
-					<p className="bs-text-sm">
-						{ __(
-							'You will need to reconnect before you can browse classes or add new forms.',
-							'book-surfer'
-						) }
-					</p>
+					{ /* Modal renders through a portal at the end of <body>, so it
+					     needs its own .booksurfer-root scope for bs- classes. */ }
+					<div className="booksurfer-root">
+						<p className="bs-text-sm bs-mt-0">
+							{ __(
+								'Booking forms already published on your pages will keep working — they are public Book Surfer links.',
+								'book-surfer'
+							) }
+						</p>
+						<p className="bs-text-sm">
+							{ __(
+								'You will need to reconnect before you can browse classes or add new forms.',
+								'book-surfer'
+							) }
+						</p>
 
-					{ error && (
-						<Notice status="error" isDismissible={ false }>
-							{ error }
-						</Notice>
-					) }
+						{ error && (
+							<Notice status="error" isDismissible={ false }>
+								{ error }
+							</Notice>
+						) }
 
-					<div className="bs-flex bs-gap-2 bs-justify-end bs-mt-4">
-						<button
-							type="button"
-							className="button"
-							onClick={ () => setConfirming( false ) }
-							disabled={ working }
-						>
-							{ __( 'Cancel', 'book-surfer' ) }
-						</button>
-						<button
-							type="button"
-							className="button button-primary"
-							onClick={ handleDisconnect }
-							disabled={ working }
-						>
-							{ working
-								? __( 'Disconnecting…', 'book-surfer' )
-								: __( 'Disconnect', 'book-surfer' ) }
-						</button>
+						<div className="bs-flex bs-gap-2 bs-justify-end bs-mt-4">
+							<button
+								type="button"
+								className="bs-btn-secondary"
+								onClick={ () => setConfirming( false ) }
+								disabled={ working }
+							>
+								{ __( 'Cancel', 'book-surfer' ) }
+							</button>
+							<button
+								type="button"
+								className="bs-btn-danger"
+								onClick={ handleDisconnect }
+								disabled={ working }
+							>
+								{ working
+									? __( 'Disconnecting…', 'book-surfer' )
+									: __( 'Disconnect', 'book-surfer' ) }
+							</button>
+						</div>
 					</div>
 				</Modal>
 			) }

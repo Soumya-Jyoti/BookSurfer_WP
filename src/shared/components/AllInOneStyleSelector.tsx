@@ -4,10 +4,15 @@
  * BSWP-30. Ported from the Framer plugin's AllInOneStyleSelector.tsx. The two
  * styles map to the SaaS ?style= param: sidebar (default, no param) and dropdown.
  *
+ * Shares .bs-option with LayoutSelector — same selected state, same keyboard and
+ * focus behaviour, one place to change it.
+ *
  * @package
  */
 
+import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { arrowLeft, check } from '@wordpress/icons';
 import {
 	ALL_IN_ONE_CONFIG,
 	ALL_IN_ONE_STYLES,
@@ -27,22 +32,23 @@ export default function AllInOneStyleSelector( {
 }: Props ) {
 	return (
 		<div className="bs-space-y-3">
-			<div className="bs-flex bs-items-center bs-justify-between">
+			<div className="bs-flex bs-items-center bs-justify-between bs-gap-2">
 				<h3 className="bs-text-base bs-font-semibold bs-m-0">
 					{ __( 'Choose a style', 'book-surfer' ) }
 				</h3>
 				{ onBack && (
 					<button
 						type="button"
-						className="button-link"
+						className="bs-btn-ghost bs-btn-sm"
 						onClick={ onBack }
 					>
+						<Icon icon={ arrowLeft } size={ 16 } />
 						{ __( 'Back', 'book-surfer' ) }
 					</button>
 				) }
 			</div>
 
-			<div className="bs-grid bs-grid-cols-2 bs-gap-3">
+			<div className="bs-grid bs-grid-cols-1 sm:bs-grid-cols-2 bs-gap-3">
 				{ ALL_IN_ONE_STYLES.map( ( style ) => {
 					const size = ALL_IN_ONE_CONFIG[ style.id ];
 					const selected = value === style.id;
@@ -52,23 +58,18 @@ export default function AllInOneStyleSelector( {
 							key={ style.id }
 							onClick={ () => onSelect( style.id ) }
 							aria-pressed={ selected }
-							className="bs-card bs-text-left bs-p-3 bs-cursor-pointer"
-							style={
-								selected
-									? {
-											borderColor: '#0d9488',
-											boxShadow: '0 0 0 1px #0d9488',
-									  }
-									: undefined
-							}
+							className="bs-option"
 						>
-							<span className="bs-block bs-font-semibold bs-text-sm">
+							<span className="bs-option__title">
 								{ style.name }
+								{ selected && (
+									<Icon icon={ check } size={ 16 } />
+								) }
 							</span>
-							<span className="bs-block bs-text-xs bs-text-slate-500 bs-mt-1">
+							<span className="bs-option__desc">
 								{ style.description }
 							</span>
-							<span className="bs-block bs-text-xs bs-text-slate-400 bs-mt-2">
+							<span className="bs-option__size">
 								{ size.width } × { size.height }
 							</span>
 						</button>

@@ -12,6 +12,9 @@ import { registerBlockType, type BlockConfiguration } from '@wordpress/blocks';
 import metadata from './block.json';
 import Edit from './edit';
 import type { BlockAttributes } from './types';
+// Order matters: the design system must precede editor.css's @tailwind utilities
+// so a utility class still beats a .bs-* component class. See design-system.css.
+import '@shared/design-system.css';
 import './editor.css';
 
 registerBlockType(

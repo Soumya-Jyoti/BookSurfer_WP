@@ -54,7 +54,7 @@ export default function App() {
 	}, [] );
 
 	return (
-		<div className="bs-p-0">
+		<div className="booksurfer-admin">
 			<h1 className="bs-text-xl bs-font-semibold bs-mb-1">
 				{ __( 'Book Surfer', 'book-surfer' ) }
 			</h1>
