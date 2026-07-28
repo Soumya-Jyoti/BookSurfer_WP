@@ -45,9 +45,14 @@ export default function App() {
 		bootstrap.status
 	);
 
+	// Force a fresh, network-fetched status (verify=1). A plain getStatus() is served
+	// from the page-load preload cache (createPreloadingMiddleware for /status), which
+	// still says "not connected" — so after connecting the panel would never switch to
+	// the connected view until a manual reload. The verify path isn't preloaded, so it
+	// hits the server; right after connect maybe_refresh() is a no-op on the fresh token.
 	const refreshStatus = useCallback( async () => {
 		try {
-			setStatus( await getStatus() );
+			setStatus( await getStatus( true ) );
 		} catch {
 			// Leave the last known status in place rather than flashing an error.
 		}
