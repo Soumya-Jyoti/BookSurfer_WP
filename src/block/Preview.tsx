@@ -71,21 +71,32 @@ export default function Preview( { src, width, height }: Props ) {
 	}
 
 	return (
-		<div className="booksurfer-block-preview" style={ { maxWidth: width } }>
+		<div
+			className="booksurfer-block-preview"
+			style={ { maxWidth: width, position: 'relative' } }
+		>
 			{ ! loaded && (
 				<div
 					className="booksurfer-block-skeleton"
-					style={ { height: Math.min( height, 240 ) } }
+					style={ { position: 'absolute', inset: 0, zIndex: 1 } }
 					aria-hidden="true"
 				>
 					{ __( 'Loading preview…', 'book-surfer' ) }
 				</div>
 			) }
 			<Disabled>
+				{ /*
+				 * The iframe MUST stay in the layout (display:block) and load eagerly.
+				 * Inside the block editor's own iframed canvas, `loading="lazy"` combined
+				 * with `display:none` is a deadlock: a hidden iframe has no layout box, so
+				 * a lazy iframe never enters the viewport, never loads, and `onLoad` never
+				 * fires — leaving the preview stuck on the timeout fallback ("Preview
+				 * unavailable") even though the front end renders fine. Keep it rendered
+				 * and just fade it in once loaded; the skeleton overlays it until then.
+				 */ }
 				<iframe
 					src={ debouncedSrc }
 					title={ __( 'Booking form preview', 'book-surfer' ) }
-					loading="lazy"
 					allow="payment"
 					onLoad={ () => {
 						setLoaded( true );
@@ -95,10 +106,12 @@ export default function Preview( { src, width, height }: Props ) {
 					} }
 					style={ {
 						border: 0,
-						display: loaded ? 'block' : 'none',
+						display: 'block',
 						width: '100%',
 						height,
 						maxWidth: '100%',
+						opacity: loaded ? 1 : 0,
+						transition: 'opacity 0.2s ease',
 					} }
 				/>
 			</Disabled>

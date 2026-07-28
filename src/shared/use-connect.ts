@@ -47,6 +47,14 @@ export function useConnect(
 	const timerRef = useRef< ReturnType< typeof setInterval > | null >( null );
 	const popupRef = useRef< Window | null >( null );
 	const mountedRef = useRef( true );
+	// Guards against overlapping polls. setInterval does NOT await the async
+	// callback, so a slow exchange (a cold first-time round-trip to the SaaS) lets
+	// the next tick fire a SECOND exchange for the same state. The `state` grant is
+	// single-use: the first poll to arrive after approval claims it (200 + tokens →
+	// connected) and the duplicate finds it already consumed → 410 "link expired",
+	// which then clobbers the successful connect. One exchange at a time keeps the
+	// grant claimed exactly once, so no spurious 410 is ever produced.
+	const inFlightRef = useRef( false );
 
 	const stopPolling = useCallback( () => {
 		if ( timerRef.current ) {
@@ -77,6 +85,7 @@ export function useConnect(
 			let pollsAfterClose = 0;
 
 			stopPolling();
+			inFlightRef.current = false;
 			timerRef.current = setInterval( async () => {
 				if ( ! mountedRef.current ) {
 					stopPolling();
@@ -94,6 +103,13 @@ export function useConnect(
 					);
 					return;
 				}
+
+				// A previous exchange is still running — skip this tick rather than
+				// firing a duplicate for the same single-use state (see inFlightRef).
+				if ( inFlightRef.current ) {
+					return;
+				}
+				inFlightRef.current = true;
 
 				try {
 					const result = await advanceConnect( stateToken );
@@ -122,6 +138,8 @@ export function useConnect(
 						}
 						return;
 					}
+				} finally {
+					inFlightRef.current = false;
 				}
 
 				// The popup closing is not immediately a cancel — the consent page
