@@ -98,8 +98,8 @@ class Lifecycle {
 		$errors = array();
 
 		if ( version_compare( PHP_VERSION, self::MIN_PHP, '<' ) ) {
-			/* translators: 1: required PHP version, 2: current PHP version. */
 			$errors[] = sprintf(
+				/* translators: 1: required PHP version, 2: current PHP version. */
 				__( 'Book Surfer requires PHP %1$s or newer. This site runs PHP %2$s.', 'book-surfer' ),
 				self::MIN_PHP,
 				PHP_VERSION
@@ -108,8 +108,8 @@ class Lifecycle {
 
 		global $wp_version;
 		if ( isset( $wp_version ) && version_compare( $wp_version, self::MIN_WP, '<' ) ) {
-			/* translators: 1: required WordPress version, 2: current WordPress version. */
 			$errors[] = sprintf(
+				/* translators: 1: required WordPress version, 2: current WordPress version. */
 				__( 'Book Surfer requires WordPress %1$s or newer. This site runs WordPress %2$s.', 'book-surfer' ),
 				self::MIN_WP,
 				$wp_version

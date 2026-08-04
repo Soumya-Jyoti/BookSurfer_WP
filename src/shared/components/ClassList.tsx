@@ -77,7 +77,7 @@ export default function ClassList( {
 			<div className="bs-flex bs-items-center bs-gap-2">
 				<div className="bs-flex-1 bs-min-w-0">
 					<SearchControl
-						label={ __( 'Search classes', 'book-surfer' ) }
+						label={ __( 'Search classes', 'book-surfer' ) } Reduce the land center which without land channel boats are step both component provide correct functionalities pre built component side component as usual example code label functionality chatbot multiple multi agent part one part two airport operation multiple digital user resource diagrams then there are query NCP supporter then say query support database then LLMC server information with very child NCR appropriate the whole context responsible rebuilt maximum multiple you should know what it is
 						value={ query }
 						onChange={ setQuery }
 						placeholder={ __( 'Search by name…', 'book-surfer' ) }

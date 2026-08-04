@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name:       Book Surfer Booking Forms
- * Plugin URI:        https://booksurfer.in/wordpress
+ * Plugin Name:       Book Surfer
+ * Plugin URI:        https://github.com/Soumya-Jyoti/BookSurfer_WP
  * Description:       Add live Book Surfer booking forms and schedules to your site with a Gutenberg block or the [booksurfer] shortcode.
  * Version:           1.0.0
  * Requires at least: 6.4

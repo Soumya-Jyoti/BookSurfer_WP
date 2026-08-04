@@ -5,6 +5,9 @@
 # Dependencies
 /node_modules/
 /vendor/
+# Local Composer binary — this machine has no global composer; fetch with
+# `curl -sS https://getcomposer.org/installer | php` then `php composer.phar install`.
+/composer.phar
 
 # Package-manager local config / caches (never commit a machine-local registry)
 .npmrc
