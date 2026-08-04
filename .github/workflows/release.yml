@@ -8,9 +8,14 @@
 # The zip is produced by `wp-scripts plugin-zip` (npm run plugin-zip), which names it
 # after the package.json "name" field -> book-surfer.zip.
 #
-# NOTE: without a .distignore or a package.json "files" field, plugin-zip falls back to
-# its default include set. Verify the produced zip excludes node_modules/, vendor/,
-# src/, tests/, stub/ and dotfiles before shipping to WordPress.org.
+# The two publish paths select files by DIFFERENT mechanisms and must be kept in sync
+# by hand — see the header of .distignore for the full explanation and the agreed
+# payload. In short: plugin-zip ignores .distignore and uses a hardcoded allowlist;
+# the 10up deploy action below reads .distignore as an exclude list.
+#
+# The WordPress.org job is gated on the WPORG_SLUG variable being set. Until the plugin
+# is approved and a slug is assigned, it is skipped and only the GitHub Release is cut.
+# To enable it, set repository variable WPORG_SLUG and secrets SVN_USERNAME/SVN_PASSWORD.
 
 name: Release
 
@@ -53,3 +58,14 @@ jobs:
           name: ${{ github.ref_name }}
           generate_release_notes: true
           files: book-surfer.zip
+
+      # Publishes to WordPress.org SVN: commits to trunk, then creates tags/<version>
+      # from the readme.txt "Stable tag" value. Skipped until WPORG_SLUG is set.
+      - name: Deploy to WordPress.org
+        if: vars.WPORG_SLUG != ''
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: ${{ vars.WPORG_SLUG }}
+          ASSETS_DIR: .wordpress-org

@@ -1,8 +1,8 @@
-=== Book Surfer Booking Forms ===
+=== Book Surfer ===
 Contributors: booksurfer
 Tags: booking, classes, schedule, block, shortcode
 Requires at least: 6.4
-Tested up to: 6.7
+Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPL-2.0-or-later
@@ -12,8 +12,8 @@ Add live Book Surfer booking forms and class schedules to any page with a block 
 
 == Description ==
 
-Book Surfer Booking Forms connects your WordPress site to your existing Book Surfer
-studio and lets you drop a live booking form or class schedule onto any page.
+Book Surfer connects your WordPress site to your existing Book Surfer studio and lets
+you drop a live booking form or class schedule onto any page.
 
 Connect once, then pick a class from your studio and place it with the **Book Surfer**
 block — or with the `[booksurfer]` shortcode if you use the Classic editor, Elementor,
@@ -57,6 +57,16 @@ No visitor data is sent to Book Surfer by the plugin itself.
 * Book Surfer website: https://booksurfer.in
 * Terms of service: https://booksurfer.in/terms
 * Privacy policy: https://booksurfer.in/privacy
+
+= Source code =
+
+The JavaScript in `build/` is compiled output. The complete, unminified TypeScript
+and JavaScript sources, together with the build configuration used to produce it
+(`webpack.config.js`, `package.json`), are available at:
+
+https://github.com/Soumya-Jyoti/BookSurfer_WP
+
+Build the plugin from source with `npm install && npm run build`.
 
 == Installation ==
 

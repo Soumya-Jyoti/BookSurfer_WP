@@ -1,0 +1,92 @@
+# Files excluded from the plugin distributed to WordPress.org.
+#
+# READ THIS BEFORE EDITING — the two release paths do NOT share a mechanism:
+#
+#   * `wp-scripts plugin-zip` (npm run plugin-zip) IGNORES this file entirely.
+#     It has no .distignore support. It globs a hardcoded, case-insensitive
+#     ALLOWLIST (see node_modules/@wordpress/scripts/scripts/plugin-zip.js):
+#         admin/**  build/**  includes/**  languages/**  public/**
+#         book-surfer.php  uninstall.php  block.json
+#         changelog.*  license.*  readme.*
+#
+#   * 10up/action-wordpress-plugin-deploy (the SVN publish step in
+#     .github/workflows/release.yml) DOES read this file, as an EXCLUDE list.
+#
+# So this file must be kept manually in sync with that allowlist, or the GitHub
+# Release zip and WordPress.org SVN trunk will silently diverge. The agreed
+# payload both paths must produce is:
+#
+#     book-surfer.php  uninstall.php  readme.txt  README.md  LICENSE.txt
+#     includes/**  build/**  languages/**
+#
+# Note: README.md ships because plugin-zip's `readme.*` glob is case-insensitive
+# and cannot be turned off. It is harmless (WordPress.org reads readme.txt) so it
+# is deliberately NOT excluded here — excluding it would break payload parity.
+# LICENSE was renamed to LICENSE.txt so the `license.*` glob matches it.
+#
+# After changing this file OR package.json, rebuild and diff the zip against the
+# payload above before shipping.
+
+# Version control
+.git
+.github
+.gitignore
+.distignore
+
+# Dependencies
+node_modules
+vendor
+composer.json
+composer.lock
+composer.phar
+package.json
+package-lock.json
+
+# Sources (compiled into build/ — see the "Source code" section of readme.txt)
+src
+
+# Build + tooling config
+webpack.config.js
+postcss.config.js
+tailwind.config.js
+tsconfig.json
+jest.config.js
+playwright.config.ts
+.wp-env.json
+.wp-env.override.json
+
+# Linting / static analysis
+phpcs.xml
+phpstan.neon
+phpstan.neon.dist
+.phpunit.result.cache
+
+# Tests and local dev harness
+tests
+stub
+phpunit.xml
+phpunit.xml.dist
+coverage
+playwright-report
+test-results
+
+# Developer-facing docs (readme.txt is the user-facing one)
+docs
+
+# Directory art — published to SVN assets/ by the deploy action, never to trunk/
+.wordpress-org
+
+# Local env / editors / OS
+.env
+.env.local
+.npmrc
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+*.log
+*.tsbuildinfo
+
+# Distribution artifacts
+*.zip
+dist

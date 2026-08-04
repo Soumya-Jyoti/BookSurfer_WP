@@ -331,7 +331,7 @@ class OAuth {
 	 */
 	private function acquire_lock() {
 		// add_option is atomic in MySQL: it fails if the row already exists.
-		if ( add_option( self::REFRESH_LOCK, time(), '', 'no' ) ) {
+		if ( add_option( self::REFRESH_LOCK, time(), '', false ) ) {
 			return true;
 		}
 
@@ -339,7 +339,7 @@ class OAuth {
 		if ( $held > 0 && ( time() - $held ) > self::LOCK_TTL ) {
 			// Stale (a fatal mid-refresh left it wedged): steal it.
 			delete_option( self::REFRESH_LOCK );
-			return (bool) add_option( self::REFRESH_LOCK, time(), '', 'no' );
+			return (bool) add_option( self::REFRESH_LOCK, time(), '', false );
 		}
 
 		return false;

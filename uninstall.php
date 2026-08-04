@@ -53,9 +53,10 @@ function booksurfer_uninstall_site() {
 
 // Multisite: iterate every site when network-activated; otherwise clean the single site.
 if ( is_multisite() ) {
-	$site_ids = get_sites( array( 'fields' => 'ids' ) );
-	foreach ( $site_ids as $site_id ) {
-		switch_to_blog( $site_id );
+	// Prefixed because uninstall.php runs at global scope — see WPCS PrefixAllGlobals.
+	$booksurfer_site_ids = get_sites( array( 'fields' => 'ids' ) );
+	foreach ( $booksurfer_site_ids as $booksurfer_site_id ) {
+		switch_to_blog( $booksurfer_site_id );
 		booksurfer_uninstall_site();
 		restore_current_blog();
 	}
