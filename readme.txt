@@ -1,11 +1,11 @@
 === Book Surfer ===
 Contributors: booksurfer
-Tags: booking, classes, schedule, block, shortcode
+Tags: booking, appointments, yoga, dance studio, scheduling
 Requires at least: 6.4
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.0.0
-License: GPL-2.0-or-later
+License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Add live Book Surfer booking forms and class schedules to any page with a block or shortcode.

@@ -105,8 +105,8 @@ class Api_Proxy {
 			$code = (int) wp_remote_retrieve_response_code( $response );
 
 			if ( 401 === $code && ! $replayed ) {
-				$replayed   = true;
-				$new_token  = $this->oauth->refresh();
+				$replayed  = true;
+				$new_token = $this->oauth->refresh();
 				if ( is_wp_error( $new_token ) ) {
 					return $this->map_token_error( $new_token );
 				}

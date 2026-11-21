@@ -1,39 +1,41 @@
 # Files excluded from the plugin distributed to WordPress.org.
 #
-# READ THIS BEFORE EDITING — the two release paths do NOT share a mechanism:
+# This file is the single list of what must NOT ship. It is read by two things:
 #
-#   * `wp-scripts plugin-zip` (npm run plugin-zip) IGNORES this file entirely.
-#     It has no .distignore support. It globs a hardcoded, case-insensitive
-#     ALLOWLIST (see node_modules/@wordpress/scripts/scripts/plugin-zip.js):
-#         admin/**  build/**  includes/**  languages/**  public/**
-#         book-surfer.php  uninstall.php  block.json
-#         changelog.*  license.*  readme.*
+#   * bin/build.sh, the manual release path. Copies the repo to ../book-surfer-build
+#     with these patterns excluded, normalises text files to LF, verifies the result
+#     and prints the tree. Run it before every SVN release (see RELEASE.md).
+#   * 10up/action-wordpress-plugin-deploy, the optional CI publish step in
+#     .github/workflows/release.yml. Uses this file as an rsync exclude list. It only
+#     runs when the WPORG_SLUG repository variable is set. Leave it unset while
+#     releasing by hand, or the two paths will race each other.
 #
-#   * 10up/action-wordpress-plugin-deploy (the SVN publish step in
-#     .github/workflows/release.yml) DOES read this file, as an EXCLUDE list.
+# Pattern semantics are rsync/gitignore style: a bare name matches at any depth
+# (so `README.md` also drops languages/README.md); a pattern containing `/` is
+# matched against the path relative to the repo root; `*` wildcards are allowed.
 #
-# So this file must be kept manually in sync with that allowlist, or the GitHub
-# Release zip and WordPress.org SVN trunk will silently diverge. The agreed
-# payload both paths must produce is:
+# `wp-scripts plugin-zip` (npm run plugin-zip, used for the GitHub Release zip)
+# IGNORES this file. It globs a hardcoded, case-insensitive allowlist:
+#     admin/**  build/**  includes/**  languages/**  public/**
+#     book-surfer.php  uninstall.php  block.json  changelog.*  license.*  readme.*
+# so that zip additionally contains README.md (matched by `readme.*`). That is the
+# only permitted difference between the GitHub zip and the SVN trunk.
 #
-#     book-surfer.php  uninstall.php  readme.txt  README.md  LICENSE.txt
-#     includes/**  build/**  languages/**
+# The payload the WordPress.org build must produce, and nothing more:
 #
-# Note: README.md ships because plugin-zip's `readme.*` glob is case-insensitive
-# and cannot be turned off. It is harmless (WordPress.org reads readme.txt) so it
-# is deliberately NOT excluded here — excluding it would break payload parity.
-# LICENSE was renamed to LICENSE.txt so the `license.*` glob matches it.
-#
-# After changing this file OR package.json, rebuild and diff the zip against the
-# payload above before shipping.
+#     book-surfer.php  uninstall.php  readme.txt  LICENSE.txt
+#     includes/**  build/**  languages/  (empty until a .pot ships)
 
 # Version control
 .git
 .github
 .gitignore
+.gitattributes
 .distignore
+.editorconfig
 
-# Dependencies
+# Dependencies. vendor/ is dev-only: composer.json has no runtime "require"
+# beyond php itself, and no shipped file loads vendor/autoload.php.
 node_modules
 vendor
 composer.json
@@ -42,7 +44,7 @@ composer.phar
 package.json
 package-lock.json
 
-# Sources (compiled into build/ — see the "Source code" section of readme.txt)
+# Sources (compiled into build/, see the "Source code" section of readme.txt)
 src
 
 # Build + tooling config
@@ -54,6 +56,7 @@ jest.config.js
 playwright.config.ts
 .wp-env.json
 .wp-env.override.json
+*.map
 
 # Linting / static analysis
 phpcs.xml
@@ -70,10 +73,14 @@ coverage
 playwright-report
 test-results
 
-# Developer-facing docs (readme.txt is the user-facing one)
+# Developer-facing docs and release tooling (readme.txt is the user-facing one)
 docs
+README.md
+CONTRIBUTING.md
+RELEASE.md
+bin
 
-# Directory art — published to SVN assets/ by the deploy action, never to trunk/
+# Directory art: published to SVN assets/ by hand or by the deploy action, never to trunk/
 .wordpress-org
 
 # Local env / editors / OS

@@ -56,7 +56,6 @@ class Admin {
 	public function register() {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
-		add_action( 'admin_notices', array( $this, 'maybe_degraded_notice' ) );
 	}
 
 	/**
@@ -196,27 +195,6 @@ class Admin {
 	public function build_missing_notice() {
 		echo '<div class="notice notice-warning"><p>';
 		echo esc_html__( 'Book Surfer: the admin assets have not been built yet. Run "npm install && npm run build" in the plugin folder.', 'book-surfer' );
-		echo '</p></div>';
-	}
-
-	/**
-	 * BSWP-12: warn admins when the refresh token could not be encrypted (neither
-	 * libsodium nor OpenSSL was available) and is only base64-encoded at rest.
-	 *
-	 * Shown on every admin screen — not just our settings page — so it is not missed,
-	 * but only to users who can act on it.
-	 *
-	 * @return void
-	 */
-	public function maybe_degraded_notice() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		if ( ! Plugin::instance()->token_store()->is_degraded() ) {
-			return;
-		}
-		echo '<div class="notice notice-warning"><p>';
-		echo esc_html__( 'Book Surfer: this server has neither the sodium nor the OpenSSL PHP extension, so your connection\'s refresh token is only base64-encoded, not encrypted. Ask your host to enable one of them, then reconnect.', 'book-surfer' );
 		echo '</p></div>';
 	}
 }
