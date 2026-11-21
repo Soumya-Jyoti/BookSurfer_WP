@@ -28,6 +28,9 @@ being missed.
 - **block.json:** `"textdomain": "book-surfer"` lets WordPress translate the block's
   title, description and keywords.
 
-`load_plugin_textdomain()` is still called from `Plugin::load_textdomain()`. It is
-redundant on WordPress 6.5+ (which loads translations automatically) but the plugin
-declares 6.4 as its minimum, where it is not.
+`load_plugin_textdomain()` is deliberately **not** called. Since WordPress 4.6, core
+loads plugin translations automatically from `wp-content/languages/plugins/`, which is
+where translate.wordpress.org language packs are installed, and Plugin Check warns
+about the call for WordPress.org-hosted plugins (it was removed on 5 Sep 2026 during
+the directory review). Consequently, `.mo` files placed in this directory are not
+loaded; translations come from language packs.

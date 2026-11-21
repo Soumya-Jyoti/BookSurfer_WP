@@ -136,9 +136,6 @@ final class Plugin {
 	 * @return void
 	 */
 	public function run() {
-		// Translations (harmless on WP 6.4+, kept for the declared minimum).
-		add_action( 'init', array( $this, 'load_textdomain' ) );
-
 		// init: block + shortcode.
 		$this->block->register();
 		$this->shortcode->register();
@@ -148,15 +145,6 @@ final class Plugin {
 
 		// admin_menu / admin_enqueue_scripts: settings page + assets.
 		$this->admin->register();
-	}
-
-	/**
-	 * Load the plugin text domain.
-	 *
-	 * @return void
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain( 'book-surfer', false, dirname( BOOKSURFER_BASENAME ) . '/languages' );
 	}
 
 	/**
