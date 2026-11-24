@@ -12,6 +12,7 @@
  *
  * Contract implemented (see docs/wordpress-connect-contract.md):
  *   GET  /connect/wordpress?state=&origin=   -> consent page (Approve / Deny)
+ *   POST /api/oauth/plugin/start {state,host,origin} -> 200 { request_token, expires_in, code }
  *   POST /api/oauth/plugin/exchange {state}  -> 202 pending | 200 tokens | 410 expired
  *   POST /api/oauth/plugin/refresh  {refresh_token} -> 200 rotated | 400 invalid_grant
  *   POST /api/oauth/plugin/revoke   {refresh_token} -> 200
@@ -232,6 +233,37 @@ async function handleApprove( req, res, approved ) {
 /* OAuth endpoints                                                          */
 /* ------------------------------------------------------------------------ */
 
+/**
+ * POST /api/oauth/plugin/start {state, host, origin} -> 200 { request_token, expires_in, code }
+ *
+ * The plugin registers a connect request before it opens the consent window.
+ * The real API signs the token; this stub only needs something token-shaped.
+ *
+ * @param {Object} req Request.
+ * @param {Object} res Response.
+ */
+async function handleStart( req, res ) {
+	const body = await readBody( req );
+
+	if (
+		! body.state ||
+		typeof body.state !== 'string' ||
+		body.host !== 'wordpress'
+	) {
+		return json( res, 400, { error: 'bad_request' } );
+	}
+
+	const claims = Buffer.from(
+		JSON.stringify( { host: body.host, origin: body.origin || null } )
+	).toString( 'base64url' );
+
+	return json( res, 200, {
+		request_token: `stub.${ claims }.signature`,
+		expires_in: 600,
+		code: 'STB-001',
+	} );
+}
+
 async function handleExchange( req, res ) {
 	const body = await readBody( req );
 	const state = body.state;
@@ -403,6 +435,12 @@ const server = http.createServer( async ( req, res ) => {
 			return handleApprove( req, res, false );
 		}
 
+		if (
+			req.method === 'POST' &&
+			pathname === '/api/oauth/plugin/start'
+		) {
+			return handleStart( req, res );
+		}
 		if (
 			req.method === 'POST' &&
 			pathname === '/api/oauth/plugin/exchange'

@@ -223,10 +223,18 @@ class Rest {
 		$state = (string) $request->get_param( 'state' );
 
 		if ( '' === $state ) {
-			// Start: mint a server-side state and hand it to the browser.
+			// Start: mint a server-side state, register the request with Book
+			// Surfer, and hand the browser what it needs to open the consent
+			// window. The request token and code are empty when the request
+			// could not be registered; the connect still works without them.
+			$new_state  = $this->oauth->start_connect();
+			$registered = $this->oauth->register_connect( $new_state );
+
 			return new \WP_REST_Response(
 				array(
-					'state' => $this->oauth->start_connect(),
+					'state'        => $new_state,
+					'requestToken' => $registered['request_token'],
+					'code'         => $registered['code'],
 				),
 				200
 			);

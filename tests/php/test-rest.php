@@ -45,6 +45,21 @@ class Test_Rest extends WP_UnitTestCase {
 
 		$this->store = new Token_Store();
 		$this->store->clear();
+
+		// Nothing in this suite may reach the network. Starting a connect now
+		// registers the request with Book Surfer (/oauth/plugin/start), so answer
+		// every outbound call with a 404 unless a test installs its own responder
+		// (those run later, at the default priority, and win).
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'response' => array( 'code' => 404 ),
+					'body'     => '{}',
+				);
+			},
+			1
+		);
 	}
 
 	/**
@@ -248,6 +263,51 @@ class Test_Rest extends WP_UnitTestCase {
 
 		$this->assertArrayHasKey( 'state', $data );
 		$this->assertMatchesRegularExpression( '/^[0-9a-f]{64}$/', $data['state'] );
+
+		// Book Surfer did not register the request here (the default responder
+		// answers 404), so the connect goes on without a token or a code.
+		$this->assertSame( '', $data['requestToken'] );
+		$this->assertSame( '', $data['code'] );
+	}
+
+	/**
+	 * POST /connect with no state registers the request with Book Surfer and
+	 * passes the request token and the connection code to the browser.
+	 *
+	 * @return void
+	 */
+	public function test_connect_start_returns_request_token_and_code() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$sent = array();
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, $args, $url ) use ( &$sent ) {
+				if ( false !== strpos( $url, '/oauth/plugin/start' ) ) {
+					$sent = json_decode( $args['body'], true );
+					return array(
+						'response' => array( 'code' => 200 ),
+						'body'     => wp_json_encode(
+							array(
+								'request_token' => 'aaa.bbb.ccc',
+								'expires_in'    => 600,
+								'code'          => 'A1B-2C3',
+							)
+						),
+					);
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$data = $this->dispatch( 'POST', '/connect' )->get_data();
+
+		$this->assertSame( 'aaa.bbb.ccc', $data['requestToken'] );
+		$this->assertSame( 'A1B-2C3', $data['code'] );
+		$this->assertSame( $data['state'], $sent['state'] );
+		$this->assertSame( 'wordpress', $sent['host'] );
 	}
 
 	/**

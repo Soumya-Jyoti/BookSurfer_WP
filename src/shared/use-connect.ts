@@ -31,6 +31,11 @@ export interface UseConnectResult {
 	error: string | null;
 	/** Present when the popup was blocked, so the UI can render an inline link. */
 	fallbackUrl: string | null;
+	/**
+	 * The connection code for the current attempt, or ''. The Book Surfer window
+	 * shows the same code, so the owner can tell it belongs to this connect.
+	 */
+	code: string;
 	connect: () => Promise< void >;
 	reset: () => void;
 }
@@ -43,6 +48,7 @@ export function useConnect(
 	const [ state, setState ] = useState< ConnectState >( 'idle' );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ fallbackUrl, setFallbackUrl ] = useState< string | null >( null );
+	const [ code, setCode ] = useState( '' );
 
 	const timerRef = useRef< ReturnType< typeof setInterval > | null >( null );
 	const popupRef = useRef< Window | null >( null );
@@ -77,6 +83,7 @@ export function useConnect(
 		setState( 'idle' );
 		setError( null );
 		setFallbackUrl( null );
+		setCode( '' );
 	}, [ stopPolling ] );
 
 	const beginPolling = useCallback(
@@ -164,21 +171,30 @@ export function useConnect(
 	const connect = useCallback( async () => {
 		setError( null );
 		setFallbackUrl( null );
+		setCode( '' );
 		setState( 'starting' );
 
 		let stateToken: string;
+		let requestToken = '';
 		try {
 			const started = await startConnect();
 			stateToken = started.state;
+			requestToken = started.requestToken || '';
+			setCode( started.code || '' );
 		} catch ( err ) {
 			setState( 'failed' );
 			setError( normalizeError( err ).message );
 			return;
 		}
 
-		const url = `${ connectUrl }?state=${ encodeURIComponent(
+		let url = `${ connectUrl }?state=${ encodeURIComponent(
 			stateToken
 		) }&origin=${ encodeURIComponent( origin ) }`;
+		// Lets the consent page check this link with Book Surfer before it shows
+		// anything. Absent when the request could not be registered.
+		if ( requestToken ) {
+			url += `&rt=${ encodeURIComponent( requestToken ) }`;
+		}
 
 		const popup = window.open(
 			url,
@@ -200,5 +216,5 @@ export function useConnect(
 		beginPolling( stateToken );
 	}, [ beginPolling, connectUrl, origin ] );
 
-	return { state, error, fallbackUrl, connect, reset };
+	return { state, error, fallbackUrl, code, connect, reset };
 }

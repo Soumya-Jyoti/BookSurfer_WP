@@ -18,7 +18,7 @@ interface Props {
 }
 
 export default function ConnectPanel( { bootstrap, onConnected }: Props ) {
-	const { state, error, fallbackUrl, connect, reset } = useConnect(
+	const { state, error, fallbackUrl, code, connect, reset } = useConnect(
 		bootstrap.connectUrl,
 		bootstrap.siteUrl,
 		onConnected
@@ -69,6 +69,23 @@ export default function ConnectPanel( { bootstrap, onConnected }: Props ) {
 						) }
 					</Notice>
 				</div>
+			) }
+
+			{ busy && code && (
+				<p
+					className="bs-text-sm bs-mt-4 bs-mb-0"
+					data-testid="bs-connect-code"
+				>
+					{ __( 'Connection code:', 'book-surfer' ) }{ ' ' }
+					<strong className="bs-tracking-widest">{ code }</strong>
+					<br />
+					<span className="bs-text-xs bs-text-slate-500">
+						{ __(
+							'Approve only if the Book Surfer window shows this same code.',
+							'book-surfer'
+						) }
+					</span>
+				</p>
 			) }
 
 			<div className="bs-flex bs-items-center bs-gap-3 bs-mt-4">

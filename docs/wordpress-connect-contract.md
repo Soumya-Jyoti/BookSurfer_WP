@@ -22,10 +22,14 @@ user-supplied host ever reaches `wp_remote_*` — that is the SSRF guard.
 browser                    WordPress (PHP)                booksurfer.in / api
    |                             |                                |
    |-- POST /connect {} -------->|                                |
-   |<-- { state } ---------------|  mints 64-hex state, stores    |
+   |                             |  mints 64-hex state, stores    |
    |                             |  it in a 10-min transient      |
+   |                             |-- POST /oauth/plugin/start --->|
+   |                             |<-- { request_token, code } ----|
+   |<-- { state, requestToken,   |  (best effort: empty when it   |
+   |      code } ----------------|   cannot be registered)        |
    |                                                              |
-   |-- window.open(APP_URL/connect/wordpress?state&origin) ------>|
+   |-- window.open(APP_URL/connect/wordpress?state&origin&rt) --->|
    |                                              user approves --|
    |                                                              |
    |-- POST /connect {state} --->|                                |
@@ -49,12 +53,36 @@ The consent page. Opened in a 520×680 browser popup.
 | `state` | yes | 64 lowercase hex chars, minted **server-side** by the plugin. Opaque, length-bounded, single-use. |
 | `origin` | yes | The requesting site URL. Displayed on the consent screen so the studio owner can see who is asking. |
 | `prompt` | no | `login` forces a fresh sign-in (used after an explicit disconnect). |
+| `rt` | no | The request token from `POST /oauth/plugin/start`. With it, the consent page asks Book Surfer which plugin and website registered the request and shows those, not the `origin` in the link. Without it (plugin 1.0.0, or the request could not be registered) the page still works and marks the request as not checked. |
 
 - Unknown host values → `400`, never a fall-through to a default.
 - On approve, the pending grant is keyed by `state` and becomes retrievable by the
   exchange endpoint.
 - Deny → clear terminal screen; the `state` is burned.
 - `state` TTL: **10 minutes** (the stub and plugin both use this).
+
+### `POST {API_URL}/oauth/plugin/start`
+
+Called once from PHP when a connect starts, before the consent window opens.
+**No auth header.** One attempt with a 5 second timeout.
+
+Request body: `{ "state": "<64 hex>", "host": "wordpress", "origin": "<site URL>" }`
+
+| Response | Meaning |
+|---|---|
+| `200 { request_token, expires_in, code }` | The request is registered. `request_token` is a signed value (three base64url parts) valid for `expires_in` seconds (600). `code` is a short connection code such as `4F2-A9C`. |
+| `400` | Malformed `state` or unknown `host`. |
+| anything else, or no answer | Treated as "not registered". |
+
+- The plugin puts `request_token` in the consent link as `rt` and shows `code`
+  while it waits for approval. The consent page shows the same code, so the
+  owner can see that the window belongs to the connect they just started.
+- **Best effort.** If the request cannot be registered, the connect carries on
+  without `rt` and without a code, exactly as plugin 1.0.0 did. Book Surfer can
+  later require a registered request (`PLUGIN_OAUTH_REQUIRE_START=true` on the
+  API); from then on a connect without `rt` is refused on the consent page.
+- The token is not a credential. It grants nothing; the exchange still needs
+  the `state`, which never leaves this site.
 
 ### `POST {API_URL}/oauth/plugin/exchange`
 

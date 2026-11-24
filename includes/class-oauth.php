@@ -86,6 +86,68 @@ class OAuth {
 	}
 
 	/**
+	 * Register a connect request with Book Surfer before the consent window opens.
+	 *
+	 * Book Surfer answers with a signed request token and a short connection code.
+	 * The token goes into the consent link, so the consent page can ask Book Surfer
+	 * which plugin and website the request came from instead of trusting the link.
+	 * The code is shown both in this plugin and on the consent page, so the owner
+	 * can see that the window belongs to the connect they just started.
+	 *
+	 * Best effort: on any failure (a network error, or a Book Surfer API that does
+	 * not offer this endpoint) both values are empty and the connect carries on
+	 * without them, exactly as it did before this step existed.
+	 *
+	 * @param string $state The pending state from start_connect().
+	 * @return array{request_token:string,code:string}
+	 */
+	public function register_connect( $state ) {
+		$empty = array(
+			'request_token' => '',
+			'code'          => '',
+		);
+
+		if ( ! $this->is_valid_state_format( $state ) ) {
+			return $empty;
+		}
+
+		$response = $this->post_json(
+			'/oauth/plugin/start',
+			array(
+				'state'  => $state,
+				'host'   => 'wordpress',
+				'origin' => home_url( '/' ),
+			),
+			5
+		);
+
+		if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+			return $empty;
+		}
+
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! is_array( $body ) || empty( $body['request_token'] ) || ! is_string( $body['request_token'] ) ) {
+			return $empty;
+		}
+
+		// A signed token is three base64url parts. Anything else is not passed on.
+		$token = $body['request_token'];
+		if ( strlen( $token ) > 2048 || ! preg_match( '/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/', $token ) ) {
+			return $empty;
+		}
+
+		$code = '';
+		if ( isset( $body['code'] ) && is_string( $body['code'] ) && preg_match( '/^[A-Z0-9]{3}-[A-Z0-9]{3}$/', $body['code'] ) ) {
+			$code = $body['code'];
+		}
+
+		return array(
+			'request_token' => $token,
+			'code'          => $code,
+		);
+	}
+
+	/**
 	 * Get the recorded pending state, if any.
 	 *
 	 * @return string
@@ -398,15 +460,16 @@ class OAuth {
 	 * POST a JSON body to a SaaS OAuth endpoint. No auth header (state / refresh
 	 * token in the body is the only credential).
 	 *
-	 * @param string              $path Endpoint path, e.g. /oauth/plugin/exchange.
-	 * @param array<string,mixed> $body Request body.
+	 * @param string              $path    Endpoint path, e.g. /oauth/plugin/exchange.
+	 * @param array<string,mixed> $body    Request body.
+	 * @param int                 $timeout Seconds to wait for the response.
 	 * @return array|\WP_Error wp_remote_post response.
 	 */
-	private function post_json( $path, array $body ) {
+	private function post_json( $path, array $body, $timeout = 10 ) {
 		return wp_remote_post(
 			rtrim( booksurfer_api_base(), '/' ) . $path,
 			array(
-				'timeout'    => 10,
+				'timeout'    => $timeout,
 				'sslverify'  => true,
 				'headers'    => array( 'Content-Type' => 'application/json' ),
 				'body'       => wp_json_encode( $body ),
