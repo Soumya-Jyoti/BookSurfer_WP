@@ -55,8 +55,16 @@ export async function getStatus( verify = false ): Promise< ConnectionStatus > {
  * The state is never generated client-side (an attacker could otherwise drive
  * the exchange).
  */
-export async function startConnect(): Promise< { state: string } > {
-	return apiFetch< { state: string } >( {
+export interface StartedConnect {
+	state: string;
+	/** Signed by Book Surfer when the request was registered; '' when it was not. */
+	requestToken?: string;
+	/** Short code the consent window shows too; '' when the request was not registered. */
+	code?: string;
+}
+
+export async function startConnect(): Promise< StartedConnect > {
+	return apiFetch< StartedConnect >( {
 		path: `/${ NS }/connect`,
 		method: 'POST',
 		data: {},

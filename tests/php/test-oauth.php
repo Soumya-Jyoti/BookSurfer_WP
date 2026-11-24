@@ -138,6 +138,134 @@ class Test_OAuth extends WP_UnitTestCase {
 	}
 
 	/**
+	 * register_connect sends the state, the plugin name and this site's address,
+	 * with no auth header, and returns the request token and connection code.
+	 *
+	 * @return void
+	 */
+	public function test_register_connect_returns_token_and_code() {
+		$state = $this->oauth->start_connect();
+		$this->mock_http(
+			array(
+				'/oauth/plugin/start' => array(
+					'code' => 200,
+					'body' => array(
+						'request_token' => 'aaa.bbb.ccc',
+						'expires_in'    => 600,
+						'code'          => 'A1B-2C3',
+					),
+				),
+			)
+		);
+
+		$result = $this->oauth->register_connect( $state );
+
+		$this->assertSame( 'aaa.bbb.ccc', $result['request_token'] );
+		$this->assertSame( 'A1B-2C3', $result['code'] );
+		$this->assertSame( 1, $this->count_requests( '/oauth/plugin/start' ) );
+
+		$sent = $this->requests[0];
+		$this->assertSame( $state, $sent['body']['state'] );
+		$this->assertSame( 'wordpress', $sent['body']['host'] );
+		$this->assertSame( home_url( '/' ), $sent['body']['origin'] );
+		$this->assertArrayNotHasKey( 'Authorization', $sent['args']['headers'] );
+		// Registering must not disturb the pending connect.
+		$this->assertSame( $state, $this->oauth->pending_state() );
+	}
+
+	/**
+	 * A Book Surfer API that does not offer the endpoint (404) leaves both values
+	 * empty, so the connect carries on the way it did before.
+	 *
+	 * @return void
+	 */
+	public function test_register_connect_is_empty_when_endpoint_is_missing() {
+		$state = $this->oauth->start_connect();
+		$this->mock_http( array() );
+
+		$result = $this->oauth->register_connect( $state );
+
+		$this->assertSame( '', $result['request_token'] );
+		$this->assertSame( '', $result['code'] );
+		$this->assertSame( $state, $this->oauth->pending_state() );
+	}
+
+	/**
+	 * A network error leaves both values empty.
+	 *
+	 * @return void
+	 */
+	public function test_register_connect_is_empty_on_network_error() {
+		$state = $this->oauth->start_connect();
+		$this->mock_http(
+			array(
+				'/oauth/plugin/start' => array(
+					'error' => true,
+					'code'  => 0,
+					'body'  => '',
+				),
+			)
+		);
+
+		$result = $this->oauth->register_connect( $state );
+
+		$this->assertSame( '', $result['request_token'] );
+		$this->assertSame( '', $result['code'] );
+	}
+
+	/**
+	 * Anything that is not a three-part signed token is not passed to the browser,
+	 * and a code in an unexpected shape is dropped.
+	 *
+	 * @return void
+	 */
+	public function test_register_connect_ignores_malformed_values() {
+		$state = $this->oauth->start_connect();
+		$this->mock_http(
+			array(
+				'/oauth/plugin/start' => array(
+					'code' => 200,
+					'body' => array(
+						'request_token' => 'not a token"><script>',
+						'code'          => 'A1B-2C3',
+					),
+				),
+			)
+		);
+		$this->assertSame( '', $this->oauth->register_connect( $state )['request_token'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->mock_http(
+			array(
+				'/oauth/plugin/start' => array(
+					'code' => 200,
+					'body' => array(
+						'request_token' => 'aaa.bbb.ccc',
+						'code'          => '<b>oops</b>',
+					),
+				),
+			)
+		);
+		$result = $this->oauth->register_connect( $state );
+		$this->assertSame( 'aaa.bbb.ccc', $result['request_token'] );
+		$this->assertSame( '', $result['code'] );
+	}
+
+	/**
+	 * A malformed state is never sent anywhere.
+	 *
+	 * @return void
+	 */
+	public function test_register_connect_makes_no_request_for_a_bad_state() {
+		$this->mock_http( array() );
+
+		$result = $this->oauth->register_connect( 'short' );
+
+		$this->assertSame( '', $result['request_token'] );
+		$this->assertSame( 0, $this->count_requests( '/oauth/plugin/start' ) );
+	}
+
+	/**
 	 * A malformed state is rejected before any outbound call.
 	 *
 	 * @return void
